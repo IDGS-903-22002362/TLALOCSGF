@@ -1,8 +1,196 @@
-<section class="hero">
-  <h1>Sistema de riego inteligente</h1>
-  <p>Automatiza tu cultivo con IoT y energía solar.</p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Riego Inteligente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
 
-  <button mat-raised-button color="primary" routerLink="/auth">
-    Iniciar sesión
-  </button>
-</section>
+    body {
+      background-color: #87DCA0;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 100%;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      font-weight: bold;
+      font-size: 20px;
+      color: #2d6a4f;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 50px;
+      align-items: center;
+      flex-wrap: wrap;
+
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .nav-links .btn {
+      background-color: #2d6a4f;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      text-align: left;
+    }
+
+    .hero-text h1 {
+      font-size: 50px;
+      color: #656565;
+      
+    }
+
+    .hero-text p {
+      font-size: 16px;
+      margin: 10px 0 20px;
+      color: #555;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .hero-buttons a {
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background-color: #2d6a4f;
+      color: white;
+    }
+
+    .btn-outline {
+      border: 2px solid #2d6a4f;
+      color: #2d6a4f;
+      background: transparent;
+    }
+
+    .features {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .feature-box {
+      background-color: #f6fef6;
+      border: 1px solid #cce5cc;
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .feature-box img {
+      height: 50px;
+      margin-bottom: 10px;
+    }
+
+    .feature-box p {
+      font-weight: 600;
+      color: #2d6a4f;
+    }
+
+    .hero-img {
+      max-width: 500px;
+      transform: translateX(-100px)
+    }
+
+    .hero-img img {
+      width: 80%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <img src="/img/logo.jng" alt="logo">
+      <div class="nav-links">
+        <a routerLink="/auth" class="btn">Login</a>
+        <a href="#">Inicio</a>
+        <a href="#">Producto</a>
+        <a href="#">Cotiza</a>
+        <a href="#">FAQ</a>
+        <a href="#">Contacto</a>
+        <a href="#" class="btn">Solicitar cotización</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Riega Inteligente,
+        <br style="margin-bottom: 30px;">Vive Verde</h1>
+        <br>
+        <p>Sistema de riego por goteo inteligente y autosustentable</p>
+        <div class="hero-buttons">
+          <a href="#" class="btn-primary">Solicitar cotización</a>
+          <a href="#" class="btn-outline">Ver producto</a>
+        </div>
+      </div>
+      <div class="hero-img">
+        <img src="/img/maqueta.jpg" alt="Sistema de riego" />
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="feature-box">
+        <img src="/img/autosustentable.png" alt="Autosustentable">
+        <p>Autosustentable</p>
+      </div>
+      <div class="feature-box">
+        <img src="/img/mobile-phone.png" alt="Control App">
+        <p>Control desde App</p>
+      </div>
+      <div class="feature-box">
+        <img src="/img/ahorro-agua.png" alt="Ahorro de agua">
+        <p>Ahorro de Agua</p>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
