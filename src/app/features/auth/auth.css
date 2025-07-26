@@ -1,0 +1,12 @@
+.login-card {
+  max-width: 360px;
+  margin: 80px auto;
+  padding: 24px;
+}
+
+.full { width: 100%; }
+
+.error {
+  color: #c62828;
+  margin-top: 8px;
+}

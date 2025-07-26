@@ -50,8 +50,12 @@
               }
             ],
             "styles": [
+              "src/custom-theme.scss",
               "src/styles.css"
-            ]
+            ],
+            "define": {
+              "import.meta.env.API_URL": "\"https://localhost:7149/api\""
+            }
           },
           "configurations": {
             "production": {
@@ -67,7 +71,16 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "define": {
+              "import.meta.env.API_URL": "\"https://localhost:7149/api\""
+              },
+              "optimization": true,
+              "extractLicenses": true,
+              "sourceMap": false,
+              "namedChunks": false,
+              "vendorChunk": false,
+              "buildOptimizer": true
             },
             "development": {
               "optimization": false,
