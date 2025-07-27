@@ -1,0 +1,105 @@
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2d6a4f;
+  padding: 1rem 2rem;
+  color: white;
+}
+
+.nav-links {
+  display: flex;
+  gap: 50px;
+  align-items: center;
+  flex-wrap: wrap;
+
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.nav-links .btn {
+  background-color: white;
+  color: #2d6a4f;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+
+.product-card {
+  padding: 1.5rem;
+  margin: 2rem auto;
+  max-width: 1000px;
+  background-color: #f0fdf4;
+  border: 1px solid #cce5cc;
+  border-radius: 12px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-section h2 {
+  font-size: 1.4rem;
+  color: #2d6a4f;
+  margin: 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-spacing: 0;
+}
+
+th {
+  background-color: #2d6a4f;
+  color: #2d6a4f;
+  font-weight: 600;
+  padding: 12px;
+}
+
+td {
+  padding: 10px 12px;
+  color: #1b4332;
+}
+
+tr:nth-child(even) td {
+  background-color: #edf7ed;
+}
+
+tr:hover td {
+  background-color: #d1e7dd;
+}
+
+.empty-message {
+  text-align: center;
+  margin: 2rem 0;
+  color: #4b4b4b;
+  font-style: italic;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+}
