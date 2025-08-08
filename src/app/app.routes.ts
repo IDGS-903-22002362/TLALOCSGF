@@ -77,6 +77,10 @@ export const routes: Routes = [
   loadComponent: () =>
     import('./features/profile/profile').then(m => m.ProfileComponent)
 },
+{
+  path: 'support',
+  loadChildren: () => import('./features/support/routes').then(m => m.SUPPORT_ROUTES)
+},
 
   /* Fallback */
   { path: '**', redirectTo: '' }
