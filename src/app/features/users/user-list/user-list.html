@@ -1,0 +1,98 @@
+<h1 class="mb-3">Lista de usuarios</h1>
+
+<!----- Toolbar: filtro y acciones ----->
+<div class="toolbar">
+  <mat-form-field appearance="outline" class="filter">
+    <mat-label>Buscar</mat-label>
+    <input  matInput
+            placeholder="Nombre o correo"
+            (input)="apply($event)">
+    <button mat-icon-button matSuffix disabled>
+      <mat-icon>search</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <span class="spacer"></span>
+
+  <button mat-raised-button color="primary"
+          [disabled]="selection.isEmpty()"
+          (click)="openEdit()">
+    <mat-icon class="mr-1">edit</mat-icon>
+    Editar
+  </button>
+
+  <button mat-raised-button color="accent"
+          [disabled]="selection.isEmpty()"
+          (click)="openRole()">
+    <mat-icon class="mr-1">manage_accounts</mat-icon>
+    Cambiar rol
+  </button>
+
+  <button mat-raised-button color="warn"
+          [disabled]="selection.isEmpty()"
+          (click)="disable()">
+    <mat-icon class="mr-1">person_off</mat-icon>
+    Deshabilitar
+  </button>
+</div>
+
+<!----- Tabla ----->
+<mat-table [dataSource]="data" class="mat-elevation-z2">
+
+  <!-- col selección (radio) -->
+  <ng-container matColumnDef="select">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <mat-radio-button
+        [checked]="selection.isSelected(row)"
+        (click)="selection.select(row)">
+      </mat-radio-button>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Nombre -->
+  <ng-container matColumnDef="fullName">
+    <mat-header-cell *matHeaderCellDef>Nombre</mat-header-cell>
+    <mat-cell  *matCellDef="let row">{{ row.fullName }}</mat-cell>
+  </ng-container>
+
+  <!-- Correo -->
+  <ng-container matColumnDef="email">
+    <mat-header-cell *matHeaderCellDef>Correo</mat-header-cell>
+    <mat-cell  *matCellDef="let row">{{ row.email }}</mat-cell>
+  </ng-container>
+
+  <!-- Roles -->
+  <ng-container matColumnDef="roles">
+    <mat-header-cell *matHeaderCellDef>Roles</mat-header-cell>
+    <mat-cell  *matCellDef="let row">
+      <mat-chip-set>
+        <mat-chip *ngFor="let r of row.roles"
+                  color="primary"
+                  selected>{{ r }}</mat-chip>
+      </mat-chip-set>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Activo -->
+  <ng-container matColumnDef="active">
+    <mat-header-cell *matHeaderCellDef>Activo</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <mat-slide-toggle [checked]="row.isActive" disabled></mat-slide-toggle>
+    </mat-cell>
+  </ng-container>
+
+  <!---- Cabeceras y filas ---->
+  <mat-header-row *matHeaderRowDef="cols"></mat-header-row>
+  <mat-row        *matRowDef="let row; columns: cols"
+                  (click)="selection.select(row)">
+  </mat-row>
+</mat-table>
+
+<!----- Paginador ----->
+<mat-paginator [length]="total"
+               [pageIndex]="query.page-1"
+               [pageSize]="query.pageSize"
+               [pageSizeOptions]="[5,10,20]"
+               (page)="pageChange($event)">
+</mat-paginator>

@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Editar usuario</h2>
+
+<form [formGroup]="f" (ngSubmit)="save()" mat-dialog-content>
+
+  <mat-form-field appearance="outline" class="w100">
+    <mat-label>Nombre completo</mat-label>
+    <input matInput formControlName="fullName" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w100">
+    <mat-label>Teléfono</mat-label>
+    <input matInput formControlName="phoneNumber" />
+  </mat-form-field>
+
+  <mat-slide-toggle formControlName="isActive">Activo</mat-slide-toggle>
+
+  <div mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancelar</button>
+    <button mat-flat-button color="primary" [disabled]="f.invalid">Guardar</button>
+  </div>
+</form>

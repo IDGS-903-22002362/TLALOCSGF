@@ -1,0 +1,7 @@
+.toolbar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.filter { flex: 1; min-width: 250px; }
+table { width: 100%; }

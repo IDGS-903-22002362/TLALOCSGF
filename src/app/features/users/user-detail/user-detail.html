@@ -1,0 +1,15 @@
+<ng-container *ngIf="user$ | async as u">
+  <mat-card>
+    <mat-card-title>{{ u.fullName }}</mat-card-title>
+    <mat-card-subtitle>{{ u.email }}</mat-card-subtitle>
+
+    <p><strong>Teléfono:</strong> {{ u.phoneNumber || '—' }}</p>
+    <p><strong>Roles:</strong> {{ u.roles.join(', ') }}</p>
+    <p><strong>Estado:</strong> <span [class.text-success]="u.isActive"
+                                     [class.text-danger]="!u.isActive">
+       {{ u.isActive ? 'Activo' : 'Inactivo' }}</span></p>
+
+    <button mat-flat-button color="primary" (click)="openEdit(u)">Editar</button>
+    <button mat-button (click)="router.navigate(['/users'])">Volver</button>
+  </mat-card>
+</ng-container>

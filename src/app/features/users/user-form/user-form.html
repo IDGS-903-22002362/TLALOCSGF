@@ -1,0 +1,18 @@
+<h2>Editar usuario</h2>
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-form-field>
+    <mat-label>Nombre completo</mat-label>
+    <input matInput formControlName="fullName" required />
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Teléfono</mat-label>
+    <input matInput formControlName="phoneNumber" />
+  </mat-form-field>
+
+  <mat-slide-toggle formControlName="isActive">Activo</mat-slide-toggle>
+
+  <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+    Guardar
+  </button>
+</form>
