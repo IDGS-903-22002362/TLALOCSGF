@@ -58,6 +58,25 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/users/routes').then(m => m.USER_ROUTES)
   },
+  {
+  path: 'requests',
+  title: 'Solicitudes',
+  canActivate: [authGuard],
+  data: { roles: ['Admin'] },
+  loadComponent: () => import('./features/requests/requests').then(c => c.RequestsComponent)
+},
+  {
+  path: 'quotes',
+  loadChildren: () =>
+    import('./features/quotes/quotes.routes').then(m => m.QUOTE_ROUTES)
+},
+{
+  path: 'profile',
+  title: 'Mi perfil',
+  canActivate: [authGuard],
+  loadComponent: () =>
+    import('./features/profile/profile').then(m => m.ProfileComponent)
+},
 
   /* Fallback */
   { path: '**', redirectTo: '' }

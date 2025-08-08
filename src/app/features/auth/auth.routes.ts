@@ -1,9 +1,10 @@
+// src/app/features/auth/auth.routes.ts
 import { Routes } from '@angular/router';
-import { AuthComponent }     from './auth';     // login existente
-import { RegisterComponent } from './register';
+import { AuthComponent } from './auth'; // login
+import { RequestAccessComponent } from './request-access';
 
 export const AUTH_ROUTES: Routes = [
-  { path: 'login',    component: AuthComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: 'login', component: AuthComponent },
+  { path: 'register', component: RequestAccessComponent }, // 👈 reemplazo
   { path: '', pathMatch: 'full', redirectTo: 'login' },
 ];

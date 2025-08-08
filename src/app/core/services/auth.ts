@@ -3,11 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Observable, map, tap, throwError } from 'rxjs';
 
+export interface UpdateProfileDto { fullName: string; phoneNumber?: string | null; }
+export interface ChangePasswordDto { currentPassword: string; newPassword: string; }
 export interface LoginDto     { email: string; password: string; }
 export interface RegisterDto  { email: string; password: string; fullName: string; role?: string; }
 export interface AuthResponse { accessToken: string; refreshToken: string; expiresIn: number; roles: string[]; }
 export interface RefreshDto   { accessToken: string; refreshToken: string; }
-export interface UserProfile  { id: string; fullName: string; email: string; roles: string[]; }
+export interface UserProfile { id: string; fullName: string; email: string; roles: string[]; phoneNumber?: string | null; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -47,9 +49,9 @@ export class AuthService {
   }
 
   /*──────── Perfil ────────*/
-  me(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.api}/auth/me`);
-  }
+ me(): Observable<UserProfile> {
+  return this.http.get<UserProfile>(`${this.api}/auth/me`);
+}
 
   /*──────── Logout ────────*/
   logout(): Observable<void> {
@@ -64,19 +66,34 @@ export class AuthService {
     const token = localStorage.getItem('token');
     return !!token && !this.jwt.isTokenExpired(token);
   }
+  updateMe(dto: UpdateProfileDto): Observable<void> {
+  return this.http.put<void>(`${this.api}/auth/me`, dto);
+}
+changePassword(dto: ChangePasswordDto): Observable<void> {
+  return this.http.post<void>(`${this.api}/auth/change-password`, dto);
+}
 
   /** Devuelve siempre un array, venga el claim `role` como string o como array  */
   get roles(): string[] {
-    const token = localStorage.getItem('token');
-    if (!token) return [];
+  const token = localStorage.getItem('token');
+  if (!token) return [];
 
-    const claim = this.jwt.decodeToken(token).role;
-    return Array.isArray(claim)
-      ? claim
-      : typeof claim === 'string'
-        ? claim.split(',').map(r => r.trim())
-        : [];
-  }
+  const decoded: any = this.jwt.decodeToken(token) ?? {};
+
+  const claim =
+    decoded['role'] ??
+    decoded['roles'] ??
+    decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+  const list = Array.isArray(claim)
+    ? claim
+    : typeof claim === 'string'
+      ? claim.split(',').map((r: string) => r.trim())
+      : [];
+
+  return list.filter(Boolean);
+}
+
 
   /*──────── Interno ────────*/
   private storeTokens(r: AuthResponse): void {
