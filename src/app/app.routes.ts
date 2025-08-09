@@ -46,7 +46,7 @@ export const routes: Routes = [
     title: 'Productos',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/products/products').then(m => m.Products)
+      import('./features/products/products').then(m => m.ProductsListComponent)
   },
 
   /* Solo Admin (ejemplo de roles) */
