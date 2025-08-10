@@ -5,12 +5,12 @@ import { importProvidersFrom, APP_INITIALIZER } from '@angular/core';
 
 import { FlexLayoutModule }     from '@ngbracket/ngx-layout';
 import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
-
+import { NgxEchartsModule } from 'ngx-echarts';
 import { routes }          from './app/app.routes';
 import { jwtInterceptor }  from './app/core/interceptors/jwt-interceptor';
 import { AuthService }     from './app/core/services/auth';
 import { App }             from './app/app';
-
+import * as echarts from 'echarts';
 /* ▸ Refresca el token una vez al arrancar si el usuario ya estaba logueado */
 function refreshOnStart(auth: AuthService) {
   return () => auth.isLoggedIn()
@@ -32,6 +32,7 @@ bootstrapApplication(App, {
     /* JWT helper */
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
     JwtHelperService,
+    importProvidersFrom(NgxEchartsModule.forRoot({ echarts })),
 
     /* APP_INITIALIZER: refresh token al cargar la app */
     {

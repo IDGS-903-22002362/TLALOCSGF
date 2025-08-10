@@ -81,6 +81,13 @@ export const routes: Routes = [
   path: 'support',
   loadChildren: () => import('./features/support/routes').then(m => m.SUPPORT_ROUTES)
 },
+{
+  path: 'reports',
+  canActivate: [authGuard],
+  data: { roles: ['Admin'] },
+  loadChildren: () => import('./features/reports/routes').then(m => m.REPORTS_ROUTES)
+},
+
 
   /* Fallback */
   { path: '**', redirectTo: '' }

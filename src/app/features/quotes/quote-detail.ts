@@ -1,98 +1,121 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+
 import { QuoteService } from '../../core/services/quotes';
 import { QuoteDetailDto } from '../../models/quote';
+import { QuoteOptionsDto, QuotePricePreviewDto, Fulfillment, StateOption } from '../../core/services/quotes';
 
 @Component({
   standalone: true,
   selector: 'app-quote-detail',
-  imports: [CommonModule],
-  template: `
-  <section class="p-6 max-w-3xl mx-auto" *ngIf="q">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-bold">Cotización #{{ q.id }}</h1>
-
-      <button
-        class="px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-        (click)="sendEmail()"
-        [disabled]="sending"
-        title="Enviar esta cotización al correo del usuario actual"
-      >
-        {{ sending ? 'Enviando…' : 'Enviar por correo' }}
-      </button>
-    </div>
-
-    <table class="w-full mb-4 border">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="p-2 text-left">Producto</th>
-          <th class="p-2 text-right">Cant.</th>
-          <th class="p-2 text-right">Precio</th>
-          <th class="p-2 text-right">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let l of q.lines" class="border-t">
-          <td class="p-2">{{ l.name }}</td>
-          <td class="p-2 text-right">{{ l.quantity }}</td>
-          <td class="p-2 text-right">{{ l.unitPrice | currency }}</td>
-          <td class="p-2 text-right">{{ l.lineTotal | currency }}</td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr class="font-semibold border-t">
-          <td colspan="3" class="p-2 text-right">Total</td>
-          <td class="p-2 text-right">{{ q.totalAmount | currency }}</td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <div class="space-y-1">
-      <p>Estado: <strong>{{ q.status }}</strong></p>
-      <p *ngIf="q.validUntil">Válido hasta: {{ q.validUntil | date }}</p>
-    </div>
-
-    <!-- Mensajes -->
-    <p *ngIf="msg" class="mt-4 text-sm" [class.text-green-600]="ok" [class.text-red-600]="!ok">
-      {{ msg }}
-    </p>
-  </section>
-  `,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './quote-detail.html'
 })
 export class QuoteDetailComponent {
-  q!: QuoteDetailDto;
+  private qs = inject(QuoteService);
+  private route = inject(ActivatedRoute);
+  private fb = inject(FormBuilder);
 
-  sending = false;
-  msg = '';
-  ok  = false;
+  id = Number(this.route.snapshot.paramMap.get('id'));
 
-  constructor(
-    private qs: QuoteService,
-    private route: ActivatedRoute
-  ) {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.qs.getQuote(id).subscribe({ next: d => (this.q = d) });
+  q = signal<QuoteDetailDto | null>(null);
+  states = signal<StateOption[]>([]);
+  preview = signal<QuotePricePreviewDto | null>(null);
+  loadingPreview = signal(false);
+  saving = signal(false);
+  msg = signal<string | null>(null);
+  ok = signal<boolean>(true);
+
+  // Formulario de opciones
+  form = this.fb.group({
+    fulfillment: this.fb.control<Fulfillment>('DevicesOnly', { nonNullable: true }),
+    stateCode: this.fb.control<string | null>(null),
+    manualDistanceKm: this.fb.control<number | null>(null)
+  });
+
+  needsState(v?: { fulfillment?: string | null }): boolean {
+  const f = (v?.fulfillment ?? this.form.get('fulfillment')!.value) as 'DevicesOnly'|'Shipping'|'Installation';
+  return f === 'Shipping' || f === 'Installation';
+}
+
+  ngOnInit() {
+  this.load();
+  this.qs.getStates().subscribe(s => this.states.set(s));
+
+  this.form.valueChanges
+    .pipe(
+      debounceTime(250),
+      distinctUntilChanged(),
+      switchMap(v => {
+        this.msg.set(null);
+
+        // ⬅️ ahora usamos el valor del form para decidir
+        if (this.needsState(v) && !v.stateCode) {
+          this.preview.set(null);
+          return of(null);
+        }
+
+        this.loadingPreview.set(true);
+        return this.qs.previewPrice(this.id, {
+          fulfillment: v.fulfillment!,
+          stateCode: v.stateCode ?? undefined,
+          manualDistanceKm: v.manualDistanceKm ?? undefined
+        });
+      })
+    )
+    .subscribe(res => {
+      this.loadingPreview.set(false);
+      if (res) this.preview.set(res);
+    });
+}
+
+  load() {
+    this.qs.getQuote(this.id).subscribe(d => {
+      this.q.set(d);
+      // si ya hay opciones guardadas en backend, inicializa el form (si añadiste esos campos al DTO, mapea aquí)
+      // por ahora dejamos valores por defecto
+    });
   }
 
-  /** Envía la cotización al correo del usuario de la sesión */
-  sendEmail(): void {
-    if (!this.q) return;
-    this.sending = true;
-    this.msg = '';
-    this.ok  = false;
-
-    this.qs.emailQuote(this.q.id).subscribe({
-      next: () => {
-        this.ok = true;
-        this.msg = 'Cotización enviada a tu correo. Si no te llega, revisa tu bandeja de spam.';
-        this.sending = false;
+  save() {
+    if (this.needsState() && !this.form.value.stateCode) {
+      this.msg.set('Selecciona el estado.');
+      this.ok.set(false);
+      return;
+    }
+    this.saving.set(true);
+    this.qs.setOptions(this.id, this.toDto()).subscribe({
+      next: p => {
+        this.preview.set(p);
+        this.msg.set('Opciones guardadas.');
+        this.ok.set(true);
+        this.saving.set(false);
+        this.load();
       },
       error: () => {
-        this.ok = false;
-        this.msg = 'No se pudo enviar el correo. Inténtalo más tarde.';
-        this.sending = false;
+        this.msg.set('No se pudieron guardar las opciones.');
+        this.ok.set(false);
+        this.saving.set(false);
       }
     });
   }
+
+  sendEmail() {
+    this.qs.emailQuote(this.id).subscribe({
+      next: () => { this.msg.set('Cotización enviada por correo.'); this.ok.set(true); },
+      error: () => { this.msg.set('No se pudo enviar el correo.'); this.ok.set(false); }
+    });
+  }
+
+  private toDto(): QuoteOptionsDto {
+    const v = this.form.getRawValue();
+    return {
+      fulfillment: v.fulfillment!,
+      stateCode: v.stateCode ?? undefined,
+      manualDistanceKm: v.manualDistanceKm ?? undefined
+    };
+    }
 }
