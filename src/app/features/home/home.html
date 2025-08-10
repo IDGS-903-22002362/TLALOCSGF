@@ -1,196 +1,222 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Riego Inteligente</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
+<!-- Fondo general -->
+<div class="min-h-screen bg-gradient-to-b from-emerald-200/70 to-emerald-50 py-6">
 
-    body {
-      background-color: #87DCA0;
-      padding: 20px;
-    }
+  <!-- Contenedor principal -->
+  <div class="mx-auto max-w-7xl rounded-3xl bg-white shadow-xl ring-1 ring-black/5">
 
-    .container {
-      background: white;
-      border-radius: 12px;
-      padding: 24px;
-      max-width: 100%;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+    <!-- NAVBAR (Flowbite-like) -->
+    <nav class="relative z-10 flex items-center justify-between px-6 py-4 md:px-10">
+      <!-- Logo -->
+      <a routerLink="/" class="flex items-center gap-2">
+        <img src="/img/logo.jng" alt="logo" class="h-8 w-8 object-contain"/>
+        <span class="sr-only">Inicio</span>
+      </a>
 
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
+      <!-- Botón mobile -->
+      <button data-collapse-toggle="main-menu" type="button"
+              class="inline-flex items-center rounded-lg p-2 text-gray-600 hover:bg-gray-100 focus:outline-none md:hidden"
+              aria-controls="main-menu" aria-expanded="false">
+        <span class="sr-only">Abrir menú</span>
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
+             d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
 
-    .logo {
-      font-weight: bold;
-      font-size: 20px;
-      color: #2d6a4f;
-    }
+      <!-- Items -->
+      <div id="main-menu"
+           class="hidden w-full items-center justify-between md:flex md:w-auto">
+        <ul class="mt-4 flex flex-col gap-1 md:mt-0 md:flex-row md:items-center md:gap-6">
+          <li><a routerLink="/" class="nav-link text-gray-700 hover:text-emerald-700">Inicio</a></li>
+          <li><a routerLink="/products" class="nav-link text-gray-700 hover:text-emerald-700">Producto</a></li>
 
-    .nav-links {
-      display: flex;
-      gap: 50px;
-      align-items: center;
-      flex-wrap: wrap;
+          <!-- Cotiza: si no está logueado manda a /auth, si sí a /quotes (o donde crees la cotización) -->
+          <li>
+            <a [routerLink]="auth.isLoggedIn() ? '/quotes' : '/auth'"
+               class="nav-link text-gray-700 hover:text-emerald-700">Cotiza</a>
+          </li>
 
-    }
+          <li><a routerLink="/support/faqs" class="nav-link text-gray-700 hover:text-emerald-700">FAQ</a></li>
 
-    .nav-links a {
-      text-decoration: none;
-      color: #333;
-      font-weight: 500;
-      font-size: 15px;
-    }
+          <!-- Contacto = tickets: público manda a login, clientes ven sus tickets -->
+          <li>
+            <a [routerLink]="auth.isLoggedIn() ? '/support/tickets' : '/auth'"
+               class="nav-link text-gray-700 hover:text-emerald-700">Contacto</a>
+          </li>
 
-    .nav-links .btn {
-      background-color: #2d6a4f;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 6px;
-      text-decoration: none;
-    }
+          <!-- Solo ADMIN -->
+          <li *ngIf="auth.roles?.includes('Admin')"
+              class="relative group">
+            <button type="button"
+                    class="nav-link inline-flex items-center gap-1 text-gray-700 hover:text-emerald-700">
+              Admin
+              <svg class="h-4 w-4 transition-transform group-hover:rotate-180"
+                   viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd"
+                   d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                   clip-rule="evenodd"/></svg>
+            </button>
+            <!-- dropdown -->
+            <div
+              class="invisible absolute right-0 mt-2 w-48 translate-y-2 rounded-xl border bg-white p-2 opacity-0 shadow-lg ring-1 ring-black/5 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+              <a routerLink="/dashboard" class="dropdown-item">Dashboard</a>
+              <a routerLink="/users" class="dropdown-item">Usuarios</a>
+              <a routerLink="/reports" class="dropdown-item">Reportes</a>
+              <a routerLink="/support/tickets-admin" class="dropdown-item">Tickets (Admin)</a>
+            </div>
+          </li>
 
-    .hero {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 30px;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
-      text-align: left;
-    }
+          <!-- Derecho: CTA y Login/Perfil -->
+          <li class="flex items-center gap-3 md:ml-4">
+            <!-- CTA “Solicitar cotización” -->
+            <a
+              [routerLink]="auth.isLoggedIn() ? '/quotes' : '/auth'"
+              class="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-md transition hover:scale-[1.02] hover:bg-emerald-600 active:scale-95">
+              Solicitar cotización
+            </a>
 
-    .hero-text h1 {
-      font-size: 50px;
-      color: #656565;
-      
-    }
-
-    .hero-text p {
-      font-size: 16px;
-      margin: 10px 0 20px;
-      color: #555;
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .hero-buttons a {
-      text-decoration: none;
-      padding: 10px 18px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
-    .btn-primary {
-      background-color: #2d6a4f;
-      color: white;
-    }
-
-    .btn-outline {
-      border: 2px solid #2d6a4f;
-      color: #2d6a4f;
-      background: transparent;
-    }
-
-    .features {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .feature-box {
-      background-color: #f6fef6;
-      border: 1px solid #cce5cc;
-      flex: 1;
-      min-width: 200px;
-      text-align: center;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .feature-box img {
-      height: 50px;
-      margin-bottom: 10px;
-    }
-
-    .feature-box p {
-      font-weight: 600;
-      color: #2d6a4f;
-    }
-
-    .hero-img {
-      max-width: 500px;
-      transform: translateX(-100px)
-    }
-
-    .hero-img img {
-      width: 80%;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <nav>
-      <img src="/img/logo.jng" alt="logo">
-      <div class="nav-links">
-        <a routerLink="/auth" class="btn">Login</a>
-        <a href="#">Inicio</a>
-        <a href="#">Producto</a>
-        <a href="#">Cotiza</a>
-        <a href="#">FAQ</a>
-        <a href="#">Contacto</a>
-        <a href="#" class="btn">Solicitar cotización</a>
+            <!-- Login / Usuario -->
+            <ng-container *ngIf="!auth.isLoggedIn(); else userMenu">
+              <a routerLink="/auth"
+                 class="rounded-xl border border-emerald-700 px-4 py-2 font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                Login
+              </a>
+            </ng-container>
+            <ng-template #userMenu>
+              <div class="relative group">
+                <button type="button"
+                        class="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50">
+                  <span class="i-lucide-user h-4 w-4"></span>
+                  Mi cuenta
+                </button>
+                <div
+                  class="invisible absolute right-0 mt-2 w-44 translate-y-2 rounded-xl border bg-white p-2 opacity-0 shadow-lg ring-1 ring-black/5 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                  <a routerLink="/support/tickets" class="dropdown-item">Mis tickets</a>
+                  <a routerLink="/quotes" class="dropdown-item">Mis cotizaciones</a>
+                  <button type="button" (click)="logout()" class="dropdown-item text-red-600">Salir</button>
+                </div>
+              </div>
+            </ng-template>
+          </li>
+        </ul>
       </div>
     </nav>
 
-    <section class="hero">
-      <div class="hero-text">
-        <h1>Riega Inteligente,
-        <br style="margin-bottom: 30px;">Vive Verde</h1>
-        <br>
-        <p>Sistema de riego por goteo inteligente y autosustentable</p>
-        <div class="hero-buttons">
-          <a href="#" class="btn-primary">Solicitar cotización</a>
-          <a href="#" class="btn-outline">Ver producto</a>
+    <!-- HERO -->
+    <section class="relative overflow-hidden px-6 pb-10 pt-6 md:px-10 md:pt-10">
+      <div class="grid items-center gap-10 md:grid-cols-2">
+        <!-- Texto -->
+        <div class="space-y-6">
+          <h1
+            class="text-4xl font-extrabold tracking-tight text-gray-800 sm:text-5xl lg:text-6xl">
+            Riega Inteligente,
+            <span class="block text-emerald-700">Vive Verde</span>
+          </h1>
+          <p class="max-w-xl text-base text-gray-600 sm:text-lg">
+            Sistema de riego por goteo inteligente y autosustentable.
+            Optimiza el consumo de agua y controla todo desde tu app.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a [routerLink]="auth.isLoggedIn() ? '/quotes' : '/auth'"
+               class="group inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white shadow-md transition hover:scale-[1.02] hover:bg-emerald-600 active:scale-95">
+              Solicitar cotización
+              <svg class="h-4 w-4 transition group-hover:translate-x-0.5"
+                   viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L12 6.414V17a1 1 0 11-2 0V6.414L6.707 9.707A1 1 0 015.293 8.293l5-5z"
+                      clip-rule="evenodd"/>
+              </svg>
+            </a>
+            <a routerLink="/products"
+               class="inline-flex items-center gap-2 rounded-xl border border-emerald-700 px-5 py-3 font-semibold text-emerald-700 transition hover:bg-emerald-50">
+              Ver producto
+            </a>
+          </div>
+
+          <!-- Badges -->
+          <div class="mt-4 flex flex-wrap gap-3">
+            <span class="badge">Ahorro de agua</span>
+            <span class="badge">Energía solar</span>
+            <span class="badge">Control desde App</span>
+          </div>
         </div>
-      </div>
-      <div class="hero-img">
-        <img src="/img/maqueta.jpg" alt="Sistema de riego" />
+
+        <!-- Imagen -->
+        <div class="relative">
+          <div
+            class="mx-auto aspect-[4/3] w-full max-w-md overflow-hidden rounded-3xl border bg-emerald-50 shadow-inner transition hover:shadow-lg">
+            <img src="/img/maqueta.jpg" alt="Sistema de riego"
+                 class="h-full w-full scale-100 object-contain transition duration-500 hover:scale-105"/>
+          </div>
+          <!-- blob decorativo -->
+          <div class="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-emerald-200/60 blur-2xl"></div>
+          <div class="pointer-events-none absolute -bottom-10 -right-8 h-32 w-32 rounded-full bg-emerald-300/50 blur-2xl"></div>
+        </div>
       </div>
     </section>
 
-    <section class="features">
-      <div class="feature-box">
-        <img src="/img/autosustentable.png" alt="Autosustentable">
-        <p>Autosustentable</p>
-      </div>
-      <div class="feature-box">
-        <img src="/img/mobile-phone.png" alt="Control App">
-        <p>Control desde App</p>
-      </div>
-      <div class="feature-box">
-        <img src="/img/ahorro-agua.png" alt="Ahorro de agua">
-        <p>Ahorro de Agua</p>
+    <!-- FEATURES -->
+    <section class="px-6 pb-12 md:px-10">
+      <div class="grid gap-6 md:grid-cols-3">
+        <!-- Card -->
+        <a routerLink="/products"
+           class="feature-card group">
+          <div class="feature-icon bg-emerald-600/10">
+            <img src="/img/autosustentable.png" class="h-8 w-8 object-contain" alt="">
+          </div>
+          <div>
+            <h3 class="feature-title group-hover:text-emerald-700">Autosustentable</h3>
+            <p class="feature-desc">Paneles solares y eficiencia energética.</p>
+          </div>
+        </a>
+
+        <a [routerLink]="auth.isLoggedIn() ? '/support/tickets' : '/auth'"
+           class="feature-card group">
+          <div class="feature-icon bg-emerald-600/10">
+            <img src="/img/mobile-phone.png" class="h-8 w-8 object-contain" alt="">
+          </div>
+          <div>
+            <h3 class="feature-title group-hover:text-emerald-700">Control desde App</h3>
+            <p class="feature-desc">Programa y monitorea desde tu móvil.</p>
+          </div>
+        </a>
+
+        <a routerLink="/support/faqs" class="feature-card group">
+          <div class="feature-icon bg-emerald-600/10">
+            <img src="/img/ahorro-agua.png" class="h-8 w-8 object-contain" alt="">
+          </div>
+          <div>
+            <h3 class="feature-title group-hover:text-emerald-700">Ahorro de agua</h3>
+            <p class="feature-desc">Riego preciso por goteo con sensores.</p>
+          </div>
+        </a>
       </div>
     </section>
+
+    <!-- BLOQUE ADMIN (solo para Admin) -->
+    <section *ngIf="auth.roles?.includes('Admin')" class="px-6 pb-12 md:px-10">
+      <h2 class="mb-4 text-xl font-semibold text-gray-800">Panel rápido (Admin)</h2>
+      <div class="grid gap-4 md:grid-cols-4">
+        <a routerLink="/dashboard" class="admin-card">Dashboard</a>
+        <a routerLink="/users" class="admin-card">Usuarios</a>
+        <a routerLink="/reports" class="admin-card">Reportes</a>
+        <a routerLink="/support/tickets-admin" class="admin-card">Tickets</a>
+      </div>
+    </section>
+
   </div>
-</body>
-</html>
+</div>
+
+<!-- utilidades tailwind para componentes -->
+<style>
+  .nav-link { @apply rounded-lg px-2 py-1 text-sm font-medium transition; }
+
+  .dropdown-item { @apply block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50; }
+
+  .badge { @apply rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700; }
+
+  .feature-card { @apply flex items-start gap-3 rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md; }
+  .feature-icon { @apply flex h-10 w-10 items-center justify-center rounded-xl text-emerald-700; }
+  .feature-title { @apply text-base font-semibold text-gray-800; }
+  .feature-desc { @apply text-sm text-gray-600; }
+
+  .admin-card { @apply rounded-2xl border p-4 text-center font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-50 hover:shadow-md; }
+</style>

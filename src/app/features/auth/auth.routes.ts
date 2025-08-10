@@ -5,6 +5,6 @@ import { RequestAccessComponent } from './request-access';
 
 export const AUTH_ROUTES: Routes = [
   { path: 'login', component: AuthComponent },
-  { path: 'register', component: RequestAccessComponent }, // 👈 reemplazo
+  { path: 'register', component: RequestAccessComponent }, 
   { path: '', pathMatch: 'full', redirectTo: 'login' },
 ];
