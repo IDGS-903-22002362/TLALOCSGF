@@ -2,7 +2,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter }        from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { importProvidersFrom, APP_INITIALIZER } from '@angular/core';
-
+import { provideEchartsCore } from 'ngx-echarts';
 import { FlexLayoutModule }     from '@ngbracket/ngx-layout';
 import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
 import { NgxEchartsModule } from 'ngx-echarts';
@@ -41,5 +41,6 @@ bootstrapApplication(App, {
       deps: [AuthService],
       multi: true,
     },
+    provideEchartsCore({ echarts }),
   ],
 }).catch(err => console.error(err));
