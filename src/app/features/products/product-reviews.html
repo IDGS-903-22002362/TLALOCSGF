@@ -1,0 +1,66 @@
+<section class="px-6 py-12 md:px-10 bg-emerald-50">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold text-emerald-800 text-center mb-8">
+      Opiniones de Nuestros Clientes
+    </h2>
+
+    <div *ngIf="loadingReviews" class="text-center text-gray-500">Cargando reseñas...</div>
+
+    <div *ngIf="!loadingReviews && reviews.length === 0" class="text-center text-gray-500">
+      No hay reseñas disponibles.
+    </div>
+
+    <div *ngIf="!loadingReviews && reviews.length > 0" class="space-y-10">
+      <article *ngFor="let review of reviews" class="bg-white rounded-2xl p-6 shadow-md dark:bg-gray-800">
+
+        <!-- Header con avatar, nombre y fecha -->
+        <div class="flex items-center mb-4">
+          <img src="/img/user.png" alt="Avatar de cliente" class="w-10 h-10 rounded-full me-4 object-cover" />
+          <div class="font-medium dark:text-white">
+            <p>{{ review.customerName }}
+              <time [attr.datetime]="review.createdAt">
+                {{ review.createdAt | date:'longDate' }}
+              </time>
+
+            </p>
+          </div>
+        </div>
+
+        <!-- Estrellas y resumen -->
+        <div class="flex items-center mb-2 space-x-1 rtl:space-x-reverse">
+          <ng-container *ngFor="let star of [1,2,3,4,5]; let i = index">
+            <svg *ngIf="star <= review.rating" class="w-4 h-4 text-yellow-400" xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.39 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.39-2.46a1 1 0 00-1.175 0l-3.39 2.46c-.784.57-1.838-.196-1.539-1.118l1.286-3.966a1 1 0 00-.364-1.118L2.045 9.393c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.966z" />
+            </svg>
+            <svg *ngIf="star > review.rating" class="w-4 h-4 text-gray-300 dark:text-gray-500"
+              xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.39 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.39-2.46a1 1 0 00-1.175 0l-3.39 2.46c-.784.57-1.838-.196-1.539-1.118l1.286-3.966a1 1 0 00-.364-1.118L2.045 9.393c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.966z" />
+            </svg>
+          </ng-container>
+          <h3 class="ms-2 text-sm font-semibold text-gray-900 dark:text-white" *ngIf="review.comment; else noComment">{{
+            review.comment }}</h3>
+          <ng-template #noComment>
+            <p class="text-gray-400 italic dark:text-gray-500">Sin comentario</p>
+          </ng-template>
+        </div>
+
+        <!-- Texto completo de la reseña -->
+        <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+          <!-- Si quieres mostrar algo más detallado, como un campo descripción -->
+          <!-- Aquí repites comentario o agregas otro campo -->
+          {{ review.comment || 'Este cliente no dejó comentario adicional.' }}
+        </p>
+
+        <!-- Opcional: acciones o feedback -->
+        <aside class="mt-4">
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Fecha de la reseña: {{ review.createdAt | date:'mediumDate' }}
+          </p>
+        </aside>
+      </article>
+    </div>
+  </div>
+</section>

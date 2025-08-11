@@ -45,6 +45,7 @@ export const routes: Routes = [
     path: 'products',
     title: 'Productos',
     canActivate: [authGuard],
+    data: { roles: ['Admin'] },
     loadComponent: () =>
       import('./features/products/products').then(m => m.ProductsListComponent)
   },
