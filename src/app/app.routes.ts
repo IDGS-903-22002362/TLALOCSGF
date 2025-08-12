@@ -88,6 +88,24 @@ export const routes: Routes = [
   data: { roles: ['Admin'] },
   loadChildren: () => import('./features/reports/routes').then(m => m.REPORTS_ROUTES)
 },
+{
+    path: 'suppliers',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/suppliers/suppliers').then(m => m.Suppliers)
+  },
+  {
+    path: 'inventory',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventory/inventory').then(m => m.Inventory)
+  },
+   {
+    path: 'purchases',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/purchases/purchases').then(m => m.PurchasesComponent)
+  },
 
 
   /* Fallback */

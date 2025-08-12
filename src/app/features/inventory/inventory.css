@@ -1,0 +1,141 @@
+/* Estilos generales */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Barra de navegación */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2d6a4f;
+  padding: 1rem 2rem;
+  color: white;
+}
+
+.nav-links {
+  display: flex;
+  gap: 50px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.nav-links .btn {
+  background-color: white;
+  color: #2d6a4f;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+/* Tarjeta de inventario */
+.inventory-card {
+  padding: 1.5rem;
+  margin: 2rem auto;
+  max-width: 1200px;
+  background-color: #f0fdf4;
+  border: 1px solid #cce5cc;
+  border-radius: 12px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-section h2 {
+  font-size: 1.4rem;
+  color: #2d6a4f;
+  margin: 0;
+}
+
+/* Selector de material */
+.material-selector {
+  margin: 1rem 0;
+}
+
+.material-selector mat-form-field {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Tabla */
+.table-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+table {
+  width: 100%;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th.mat-header-cell {
+  background-color: #2d6a4f !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 12px !important;
+  text-align: center !important;
+}
+
+td.mat-cell {
+  padding: 10px 12px !important;
+  color: #1b4332;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center !important;
+}
+
+tr.mat-row:nth-child(even) td {
+  background-color: #edf7ed;
+}
+
+tr.mat-row:hover td {
+  background-color: #d1e7dd;
+}
+
+/* Mensajes vacíos */
+.empty-state {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.empty-message {
+  color: #4b4b4b;
+  font-style: italic;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+/* Formato de números */
+.number-cell {
+  text-align: right !important;
+  font-family: monospace;
+}
+
+.currency-cell {
+  text-align: right !important;
+  font-family: monospace;
+  color: #1b4332;
+  font-weight: 500;
+}

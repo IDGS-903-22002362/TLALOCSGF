@@ -1,1 +1,113 @@
-<p>inventory works!</p>
+
+<div class="container">
+  <nav>
+    <img src="/img/logo.jng" alt="logo">
+    <div class="nav-links">
+      <a href="#">Inicio</a>
+      <a href="#">Producto</a>
+      <a href="#">Reseñas</a>
+      <a href="#">FAQ</a>
+      <a href="#">Contacto</a>
+      <a routerLink="/auth" class="btn">Iniciar sesión</a>
+    </div>
+  </nav>
+
+  <mat-card class="inventory-card">
+    <div class="card-header">
+      <div class="title-section">
+        <mat-icon color="primary">inventory</mat-icon>
+        <h2>Costeo por Promedio</h2>
+      </div>
+    </div>
+
+    <!-- Selector de material -->
+    <div class="material-selector">
+      <mat-form-field appearance="outline">
+        <mat-label>Seleccionar material</mat-label>
+        <mat-select [(ngModel)]="selectedMaterial" (selectionChange)="loadInventoryData()">
+          <mat-option *ngFor="let material of materials" [value]="material.materialId">
+            {{ material.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Barra de carga -->
+    <mat-progress-bar *ngIf="loading" mode="indeterminate" color="primary"></mat-progress-bar>
+
+    <!-- Tabla de movimientos -->
+    <div class="table-container" *ngIf="movements.length > 0 && !loading">
+      <table mat-table [dataSource]="movements" class="mat-elevation-z2">
+        <!-- Fecha -->
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef> Fecha </th>
+          <td mat-cell *matCellDef="let item"> {{ item.fecha | date:'dd/MM/yyyy' }} </td>
+        </ng-container>
+
+        <!-- Entrada -->
+        <ng-container matColumnDef="entrada">
+          <th mat-header-cell *matHeaderCellDef> Entrada </th>
+          <td mat-cell *matCellDef="let item"> {{ item.entrada }} </td>
+        </ng-container>
+
+        <!-- Salida -->
+        <ng-container matColumnDef="salida">
+          <th mat-header-cell *matHeaderCellDef> Salida </th>
+          <td mat-cell *matCellDef="let item"> {{ item.salida }} </td>
+        </ng-container>
+
+        <!-- Existencias -->
+        <ng-container matColumnDef="existencias">
+          <th mat-header-cell *matHeaderCellDef> Existencias </th>
+          <td mat-cell *matCellDef="let item"> {{ item.existencias }} </td>
+        </ng-container>
+
+        <!-- Costo Unitario -->
+        <ng-container matColumnDef="costoUnitario">
+          <th mat-header-cell *matHeaderCellDef> Costo Unitario </th>
+          <td mat-cell *matCellDef="let item"> {{ formatCurrency(item.costoUnitario) }} </td>
+        </ng-container>
+
+        <!-- Promedio -->
+        <ng-container matColumnDef="promedio">
+          <th mat-header-cell *matHeaderCellDef> Promedio </th>
+          <td mat-cell *matCellDef="let item"> 
+            {{ item.promedio ? formatCurrency(item.promedio) : '-' }} 
+          </td>
+        </ng-container>
+
+        <!-- Debo -->
+        <ng-container matColumnDef="debo">
+          <th mat-header-cell *matHeaderCellDef> Debo </th>
+          <td mat-cell *matCellDef="let item"> {{ formatCurrency(item.debo) }} </td>
+        </ng-container>
+
+        <!-- Haber -->
+        <ng-container matColumnDef="haber">
+          <th mat-header-cell *matHeaderCellDef> Haber </th>
+          <td mat-cell *matCellDef="let item"> {{ formatCurrency(item.haber) }} </td>
+        </ng-container>
+
+        <!-- Saldo -->
+        <ng-container matColumnDef="saldo">
+          <th mat-header-cell *matHeaderCellDef> Saldo </th>
+          <td mat-cell *matCellDef="let item"> {{ formatCurrency(item.saldo) }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <!-- Mensaje vacío -->
+    <div *ngIf="!loading" class="empty-state">
+      <p *ngIf="!selectedMaterial" class="empty-message">
+        📦 Selecciona un material para ver su costeo por promedio
+      </p>
+      <p *ngIf="selectedMaterial && movements.length === 0" class="empty-message">
+        📭 No hay movimientos registrados para este material
+      </p>
+    </div>
+  </mat-card>
+</div>
+

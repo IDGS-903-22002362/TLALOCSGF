@@ -1,1 +1,116 @@
-<p>suppliers works!</p>
+
+<div class="container">
+  <nav>
+    <img src="/img/logo.jng" alt="logo">
+    <div class="nav-links">
+      <a href="#">Inicio</a>
+      <a href="#">Producto</a>
+      <a href="#">Reseñas</a>
+      <a href="#">FAQ</a>
+      <a href="#">Contacto</a>
+      <a routerLink="/auth" class="btn">Iniciar sesión</a>
+    </div>
+  </nav>
+
+  <mat-card class="supplier-card">
+    <div class="card-header">
+      <div class="title-section">
+        <mat-icon color="primary">local_shipping</mat-icon>
+        <h2>Gestión de Proveedores</h2>
+      </div>
+      <button mat-raised-button color="primary" (click)="newSupplier()">
+        <mat-icon>add</mat-icon>
+        Nuevo proveedor
+      </button>
+    </div>
+
+    <!-- Campo de búsqueda -->
+    <mat-form-field appearance="outline" style="width: 300px; margin-top: 1rem;">
+      <mat-label>Buscar proveedor</mat-label>
+      <input matInput [(ngModel)]="search" (input)="onSearchChange()" placeholder="Nombre, contacto, email, etc.">
+    </mat-form-field>
+   
+  <div class="status-filters">
+    <mat-checkbox [(ngModel)]="showActive" (change)="applyFilters()" color="primary" class="filter-checkbox">
+      Activos
+    </mat-checkbox>
+    <mat-checkbox [(ngModel)]="showInactive" (change)="applyFilters()" color="primary" class="filter-checkbox">
+      Inactivos
+    </mat-checkbox>
+  </div>
+
+
+    <!-- Barra de carga -->
+    <mat-progress-bar *ngIf="loading" mode="indeterminate" color="primary"></mat-progress-bar>
+
+    <!-- Tabla de proveedores -->
+    <div class="table-container" *ngIf="!loading">
+      <table mat-table [dataSource]="filteredSuppliers" class="mat-elevation-z2">
+        <!-- Nombre -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+          <td mat-cell *matCellDef="let supplier"> {{ supplier.name }} </td>
+        </ng-container>
+
+        <!-- Contacto -->
+        <ng-container matColumnDef="contactName">
+          <th mat-header-cell *matHeaderCellDef> Contacto </th>
+          <td mat-cell *matCellDef="let supplier"> {{ supplier.contactName }} </td>
+        </ng-container>
+
+        <!-- Email -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef> Email </th>
+          <td mat-cell *matCellDef="let supplier"> {{ supplier.email }} </td>
+        </ng-container>
+
+        <!-- Teléfono -->
+        <ng-container matColumnDef="phone">
+          <th mat-header-cell *matHeaderCellDef> Teléfono </th>
+          <td mat-cell *matCellDef="let supplier"> {{ supplier.phone }} </td>
+        </ng-container>
+
+        <!-- Dirección -->
+        <ng-container matColumnDef="address">
+          <th mat-header-cell *matHeaderCellDef> Dirección </th>
+          <td mat-cell *matCellDef="let supplier"> {{ supplier.address }} </td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="isActive">
+    <th mat-header-cell *matHeaderCellDef> Estado </th>
+    <td mat-cell *matCellDef="let supplier">
+      <mat-slide-toggle
+        [checked]="supplier.isActive"
+        (change)="toggleSupplierStatus(supplier)"
+        color="primary">
+        {{ supplier.isActive ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </td>
+  </ng-container>
+        <!-- Acciones -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td mat-cell *matCellDef="let supplier">
+            <button mat-icon-button color="primary" matTooltip="Editar" (click)="editSupplier(supplier)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="deleteSupplier(supplier.supplierId)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <!-- Mensaje vacío -->
+    <p *ngIf="!loading && filteredSuppliers.length === 0" class="empty-message">
+      🚚 No hay proveedores registrados todavía.
+    </p>
+  </mat-card>
+</div>
+
+

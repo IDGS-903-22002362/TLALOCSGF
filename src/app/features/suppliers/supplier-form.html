@@ -1,0 +1,36 @@
+<mat-card>
+  <h2>{{ editMode ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h2>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Nombre de contacto</mat-label>
+      <input matInput formControlName="contactName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput formControlName="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="phone" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Dirección</mat-label>
+      <input matInput formControlName="address" />
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-button type="button" (click)="cancel()">Cancelar</button>
+      <button mat-flat-button color="primary" type="submit">
+        {{ editMode ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</mat-card>
