@@ -9,104 +9,140 @@ import { ReportsService, RotationResponse, RotationRow } from '../../core/servic
   selector: 'app-rotation-report',
   imports: [CommonModule, FormsModule, NgxEchartsModule],
   template: `
-  <section class="max-w-7xl mx-auto p-6 space-y-4">
-    <h1 class="text-2xl font-bold">Rotación de inventario</h1>
+  <section class="bg-emerald-50/60 min-h-[80vh]">
+    <div class="mx-auto max-w-7xl px-6 py-8 space-y-5">
+      <h1 class="text-3xl font-extrabold text-gray-900">Rotación de inventario</h1>
 
-    <!-- Filtros -->
-    <div class="bg-white border rounded p-4 flex flex-wrap gap-3 items-end">
-      <div>
-        <label class="text-sm text-gray-600 block mb-1">Días</label>
-        <input type="number" class="border rounded px-3 py-2 w-28" [(ngModel)]="days" (change)="goto(1)">
-      </div>
+      <!-- Filtros -->
+      <div class="rounded-2xl border bg-white/80 backdrop-blur p-4 shadow ring-1 ring-black/5 overflow-hidden">
+        <div class="grid items-end gap-3 md:grid-cols-12">
+          <!-- Días -->
+          <div class="col-span-12 md:col-span-2">
+            <label class="mb-1 block text-sm text-gray-600">Días</label>
+            <input
+              type="number"
+              class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-800
+                     focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              [(ngModel)]="days"
+              (change)="goto(1)"
+              min="1"
+            />
+          </div>
 
-      <div class="grow max-w-md">
-        <label class="text-sm text-gray-600 block mb-1">Buscar (nombre / SKU)</label>
-        <input class="border rounded px-3 py-2 w-full"
-               [(ngModel)]="q"
-               (keyup.enter)="goto(1)"
-               placeholder="Ej. filtro, BOM-123, etc.">
-      </div>
+          <!-- Buscar -->
+          <div class="col-span-12 md:col-span-6">
+            <label class="mb-1 block text-sm text-gray-600">Buscar (nombre / SKU)</label>
+            <input
+              class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-800
+                     focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              [(ngModel)]="q"
+              (keyup.enter)="goto(1)"
+              placeholder="Ej. filtro, BOM-123, etc."
+            />
+          </div>
 
-      <div>
-        <label class="text-sm text-gray-600 block mb-1">Página</label>
-        <div class="flex items-center gap-2">
-          <button class="px-3 py-2 border rounded" (click)="prev()" [disabled]="page<=1">‹</button>
-          <div class="min-w-[4rem] text-center">{{ page }}</div>
-          <button class="px-3 py-2 border rounded" (click)="next()" [disabled]="page>=totalPages()">›</button>
+          <!-- Página -->
+          <div class="col-span-6 md:col-span-2">
+            <label class="mb-1 block text-sm text-gray-600">Página</label>
+            <div class="flex items-center gap-2">
+              <button class="rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50"
+                      (click)="prev()" [disabled]="page<=1">‹</button>
+              <div class="min-w-[3.5rem] text-center">{{ page }}</div>
+              <button class="rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50"
+                      (click)="next()" [disabled]="page>=totalPages()">›</button>
+            </div>
+          </div>
+
+          <!-- Tamaño -->
+          <div class="col-span-6 md:col-span-2">
+            <label class="mb-1 block text-sm text-gray-600">Tamaño</label>
+            <select
+              class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-800
+                     focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              [(ngModel)]="pageSize" (change)="goto(1)">
+              <option [ngValue]="20">20</option>
+              <option [ngValue]="50">50</option>
+              <option [ngValue]="100">100</option>
+              <option [ngValue]="200">200</option>
+            </select>
+          </div>
+
+          <!-- Acciones -->
+          <div class="col-span-12 flex flex-wrap items-center justify-end gap-2">
+            <button
+              class="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow
+                     hover:scale-[1.01] hover:bg-emerald-600 active:scale-95"
+              (click)="load()">
+              Aplicar
+            </button>
+            <button class="rounded-xl border px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    (click)="reset()">Reset</button>
+            <button class="rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50"
+                    (click)="download('csv')">CSV</button>
+            <button class="rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50"
+                    (click)="download('pdf')">PDF</button>
+          </div>
         </div>
       </div>
 
-      <div>
-        <label class="text-sm text-gray-600 block mb-1">Tamaño</label>
-        <select class="border rounded px-3 py-2" [(ngModel)]="pageSize" (change)="goto(1)">
-          <option [ngValue]="20">20</option>
-          <option [ngValue]="50">50</option>
-          <option [ngValue]="100">100</option>
-          <option [ngValue]="200">200</option>
-        </select>
+      <!-- Gráfica: Top 20 con menor cobertura -->
+      <div class="rounded-2xl border bg-white/90 p-4 shadow ring-1 ring-black/5">
+        <div class="mb-2 text-sm text-gray-600">
+          Top 20 con menor <b>días de cobertura</b> (solo materiales con consumo &gt; 0).
+        </div>
+        <div echarts [options]="chartOpt" class="w-full" style="height: 440px;"></div>
       </div>
 
-      <div class="ml-auto flex gap-2">
-        <button class="px-3 py-2 border rounded" (click)="download('csv')">CSV</button>
-        <button class="px-3 py-2 border rounded" (click)="download('pdf')">PDF</button>
+      <!-- Tabla -->
+      <div class="overflow-x-auto rounded-2xl border bg-white/90 shadow ring-1 ring-black/5">
+        <table class="min-w-full text-sm text-gray-800">
+          <thead class="bg-gray-50/80 text-gray-600">
+            <tr>
+              <th class="p-3 text-left font-semibold">Material</th>
+              <th class="p-3 text-left font-semibold">SKU</th>
+              <th class="p-3 text-right font-semibold">Stock</th>
+              <th class="p-3 text-right font-semibold">Salida diaria</th>
+              <th class="p-3 text-right font-semibold">Días de cobertura</th>
+              <th class="p-3 text-center font-semibold">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of rows()" class="border-t hover:bg-gray-50/50">
+              <td class="p-3">{{ r.name }}</td>
+              <td class="p-3">{{ r.sku || '-' }}</td>
+              <td class="p-3 text-right">{{ r.stockQty }}</td>
+              <td class="p-3 text-right">{{ r.avgDailyOut }}</td>
+              <td class="p-3 text-right">
+                {{ r.daysSupply === null ? 'N/A' : (r.daysSupply | number:'1.0-1') }}
+              </td>
+              <td class="p-3 text-center">
+                <span class="px-2 py-0.5 rounded text-xs"
+                      [class.bg-red-100]="state(r)==='Crítico'"
+                      [class.text-red-700]="state(r)==='Crítico'"
+                      [class.bg-amber-100]="state(r)==='Medio'"
+                      [class.text-amber-700]="state(r)==='Medio'"
+                      [class.bg-green-100]="state(r)==='OK'"
+                      [class.text-green-700]="state(r)==='OK'">
+                  {{ state(r) }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="rows().length===0">
+              <td colspan="6" class="p-6 text-center text-gray-600">Sin resultados</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
 
-    <!-- Gráfica ECharts: Top 20 con menor cobertura -->
-    <div class="bg-white border rounded p-4">
-      <div class="mb-2 text-sm text-gray-600">
-        Top 20 con menor <b>días de cobertura</b> (solo materiales con consumo &gt; 0).
-      </div>
-      <div echarts [options]="chartOpt" class="w-full" style="height: 420px;"></div>
-    </div>
-
-    <!-- Tabla -->
-    <div class="overflow-x-auto border rounded">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="p-2 text-left">Material</th>
-            <th class="p-2 text-left">SKU</th>
-            <th class="p-2 text-right">Stock</th>
-            <th class="p-2 text-right">Salida diaria</th>
-            <th class="p-2 text-right">Días de cobertura</th>
-            <th class="p-2 text-center">Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let r of rows()" class="border-t">
-            <td class="p-2">{{ r.name }}</td>
-            <td class="p-2">{{ r.sku || '-' }}</td>
-            <td class="p-2 text-right">{{ r.stockQty }}</td>
-            <td class="p-2 text-right">{{ r.avgDailyOut }}</td>
-            <td class="p-2 text-right">{{ r.daysSupply === null ? 'N/A' : (r.daysSupply | number:'1.0-1') }}</td>
-            <td class="p-2 text-center">
-              <span class="px-2 py-0.5 rounded text-xs"
-                    [class.bg-red-100]="state(r)==='Crítico'"
-                    [class.text-red-700]="state(r)==='Crítico'"
-                    [class.bg-amber-100]="state(r)==='Medio'"
-                    [class.text-amber-700]="state(r)==='Medio'"
-                    [class.bg-green-100]="state(r)==='OK'"
-                    [class.text-green-700]="state(r)==='OK'">
-                {{ state(r) }}
-              </span>
-            </td>
-          </tr>
-          <tr *ngIf="rows().length===0">
-            <td colspan="6" class="p-4 text-center text-gray-500">Sin resultados</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Paginación -->
-    <div class="mt-3 flex items-center justify-between">
-      <div class="text-sm text-gray-600">
-        Página {{ page }} de {{ totalPages() }} — {{ total() }} registros
-      </div>
-      <div class="flex gap-2">
-        <button class="px-3 py-1 border rounded" (click)="prev()" [disabled]="page<=1">Anterior</button>
-        <button class="px-3 py-1 border rounded" (click)="next()" [disabled]="page>=totalPages()">Siguiente</button>
+      <!-- Paginación -->
+      <div class="mt-3 flex items-center justify-between">
+        <div class="text-sm text-gray-600">
+          Página {{ page }} de {{ totalPages() }} — {{ total() }} registros
+        </div>
+        <div class="flex gap-2">
+          <button class="rounded-xl border px-3 py-1" (click)="prev()" [disabled]="page<=1">Anterior</button>
+          <button class="rounded-xl border px-3 py-1" (click)="next()" [disabled]="page>=totalPages()">Siguiente</button>
+        </div>
       </div>
     </div>
   </section>
@@ -128,28 +164,48 @@ export class RotationReportComponent {
 
   ngOnInit() { this.load(); }
 
+  reset() {
+    this.days = 30;
+    this.q = '';
+    this.page = 1;
+    this.pageSize = 50;
+    this.load();
+  }
+
   load() {
-    this.api.getRotation({ days: this.days, page: this.page, pageSize: this.pageSize, q: this.q || undefined })
-      .subscribe((res: RotationResponse) => {
-        this.rows.set(res.rows);
-        this.total.set(res.total);
-        this.chartOpt = this.buildChart(res.rows);
-      });
+    this.api.getRotation({
+      days: this.days,
+      page: this.page,
+      pageSize: this.pageSize,
+      q: this.q || undefined
+    })
+    .subscribe((res: RotationResponse) => {
+      this.rows.set(res.rows);
+      this.total.set(res.total);
+      this.chartOpt = this.buildChart(res.rows);
+    });
   }
 
   // Descargas
   download(fmt: 'csv'|'pdf') {
-    this.api.exportRotation(fmt as any, { days: this.days, page: this.page, pageSize: this.pageSize, q: this.q || undefined })
-      .subscribe(res => {
-        const blob = res.body as Blob;
-        const cd = res.headers.get('Content-Disposition') || '';
-        const match = /filename="?([^"]+)"?/i.exec(cd);
-        const filename = match?.[1] ?? `rotation.${fmt}`;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = filename; a.click();
-        URL.revokeObjectURL(url);
-      });
+    this.api.exportRotation(fmt, {
+      days: this.days,
+      page: this.page,
+      pageSize: this.pageSize,
+      q: this.q || undefined
+    }).subscribe(res => {
+      const blob = res.body as Blob;
+      const cd = res.headers.get('Content-Disposition') || '';
+      const match = /filename="?([^"]+)"?/i.exec(cd);
+      const filename = match?.[1] ?? `rotation.${fmt}`;
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   }
 
   // Helpers UI
@@ -172,15 +228,43 @@ export class RotationReportComponent {
       .sort((a, b) => (a.daysSupply! - b.daysSupply!))
       .slice(0, 20);
 
-    const categories = filtered.map(r => `${r.name}${r.sku ? ' ('+r.sku+')' : ''}`);
-    const values = filtered.map(r => r.daysSupply);
+    const categories = filtered.map(r => `${r.name}${r.sku ? ' (' + r.sku + ')' : ''}`);
+    const values = filtered.map(r => r.daysSupply!);
+
+    const colorFor = (v: number) => {
+      if (v < 5)  return '#ef4444';   // rojo - crítico
+      if (v <= 15) return '#f59e0b';  // ámbar - medio
+      return '#10b981';               // verde - ok
+    };
 
     return {
-      tooltip: { trigger: 'axis' },
-      grid: { left: 180, right: 30, top: 10, bottom: 20 },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (p: any) => {
+          const it = Array.isArray(p) ? p[0] : p;
+          return `${it.name}<br/><b>${it.value}</b> d`;
+        }
+      },
+      grid: { left: 220, right: 32, top: 10, bottom: 20 },
       xAxis: { type: 'value', name: 'Días cobertura' },
-      yAxis: { type: 'category', data: categories, axisLabel: { width: 160, overflow: 'truncate' } },
-      series: [{ type: 'bar', data: values }]
+      yAxis: {
+        type: 'category',
+        data: categories,
+        axisLabel: {
+          width: 200,
+          overflow: 'truncate'
+        }
+      },
+      series: [{
+        type: 'bar',
+        data: values,
+        barWidth: '60%',
+        label: { show: true, position: 'right', formatter: '{c} d' },
+        itemStyle: {
+          color: (params: any) => colorFor(params.value as number)
+        }
+      }]
     };
   }
 }

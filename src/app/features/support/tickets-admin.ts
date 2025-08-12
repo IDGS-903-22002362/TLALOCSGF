@@ -1,101 +1,147 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';           
+import { FormsModule } from '@angular/forms';
 import { SupportService, TicketDto, PagedResult } from '../../core/services/support';
 import { RouterLink } from '@angular/router';
 
 @Component({
   standalone: true,
   selector: 'app-tickets-admin',
-  imports: [CommonModule, FormsModule, RouterLink],                 
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
-  <section class="max-w-6xl mx-auto p-6">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold">Tickets (Admin)</h1>
-    <div class="flex gap-2">
-      <select class="border rounded px-3 py-2" [(ngModel)]="status" (change)="goto(1)">
-        <option value="">Todos</option>
-        <option>Open</option>
-        <option>In Progress</option>
-        <option>Closed</option>
-      </select>
-      <input class="border rounded px-3 py-2" [(ngModel)]="q" (keyup.enter)="goto(1)" placeholder="Buscar...">
-      <button class="px-3 py-2 border rounded" (click)="clear()">Limpiar</button>
-    </div>
-  </div>
+  <section class="bg-emerald-50/60 min-h-[80vh]">
+    <div class="mx-auto max-w-6xl px-6 py-10">
 
-  <div class="overflow-x-auto border rounded">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="p-2 text-left">Asunto</th>
-          <th class="p-2 text-left">ClienteId</th>
-          <th class="p-2 text-center">Estado</th>
-          <th class="p-2 text-center">Creado</th>
-          <th class="p-2 text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let t of items" class="border-t">
-          <td class="p-2">
-            <a [routerLink]="['/support/tickets', t.id]" class="text-green-700 hover:underline">
-              {{ t.subject }}
-            </a>
-          </td>
-          <td class="p-2">{{ t.customerId }}</td>
-          <td class="p-2 text-center">
-            <span class="px-2 py-0.5 rounded"
-                  [class.bg-yellow-100]="t.status==='Open'"
-                  [class.bg-blue-100]="t.status==='In Progress'"
-                  [class.bg-green-100]="t.status==='Closed'">
-              {{ t.status }}
+      <!-- Header + Filtros -->
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-3xl font-extrabold text-gray-900">Tickets (Admin)</h1>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Estado -->
+          <select
+            class="rounded-xl border border-gray-300 bg-white/90 px-3 py-2 text-gray-800 shadow-sm
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="status" (change)="goto(1)">
+            <option value="">Todos</option>
+            <option>Open</option>
+            <option>In Progress</option>
+            <option>Closed</option>
+          </select>
+
+          <!-- Buscador -->
+          <div class="relative">
+            <span class="pointer-events-none absolute inset-y-0 left-3 my-auto text-gray-400">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/>
+              </svg>
             </span>
-          </td>
-          <td class="p-2 text-center">{{ t.createdAt | date:'short' }}</td>
-          <td class="p-2 text-right">
-            <select class="border rounded px-2 py-1"
-                    [ngModel]="t.status"
-                    (ngModelChange)="changeStatus(t, $event)">
-              <option>Open</option>
-              <option>In Progress</option>
-              <option>Closed</option>
-            </select>
-          </td>
-        </tr>
-        <tr *ngIf="items.length===0">
-          <td colspan="5" class="p-4 text-center text-gray-500">Sin resultados</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+            <input
+              class="w-64 rounded-2xl border border-gray-300 bg-white/90 px-10 py-2.5 text-gray-800 shadow-sm
+                     focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              [(ngModel)]="q" (keyup.enter)="goto(1)" placeholder="Buscar..." />
+            <button *ngIf="q"
+              class="absolute right-2 inset-y-0 my-auto rounded-md px-2 py-1 text-gray-500 hover:bg-gray-100"
+              (click)="clear()">
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
 
-  <div class="mt-3 flex items-center justify-between">
-    <div class="text-sm text-gray-600">
-      Página {{ page }} de {{ totalPages }} — {{ total }} registros
+      <!-- Tabla -->
+      <div class="overflow-hidden rounded-2xl border bg-white/80 backdrop-blur shadow ring-1 ring-black/5">
+        <table class="w-full table-auto text-sm text-gray-800">
+          <thead class="bg-gray-50/80 text-gray-600">
+            <tr>
+              <th class="p-3 text-left font-semibold">Asunto</th>
+              <th class="p-3 text-left font-semibold">ClienteId</th>
+              <th class="p-3 text-center font-semibold">Estado</th>
+              <th class="p-3 text-center font-semibold">Creado</th>
+              <th class="p-3 text-right font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of items" class="border-t hover:bg-gray-50/60">
+              <td class="p-3">
+                <a [routerLink]="['/support/tickets', t.id]"
+                   class="text-emerald-700 hover:underline">
+                  {{ t.subject }}
+                </a>
+              </td>
+              <td class="p-3">{{ t.customerId }}</td>
+              <td class="p-3 text-center">
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+                      [ngClass]="{
+                        'border-amber-200 bg-amber-50 text-amber-700': t.status==='Open',
+                        'border-sky-200 bg-sky-50 text-sky-700': t.status==='In Progress',
+                        'border-emerald-200 bg-emerald-50 text-emerald-700': t.status==='Closed'
+                      }">
+                  {{ t.status }}
+                </span>
+              </td>
+              <td class="p-3 text-center">{{ t.createdAt | date:'short' }}</td>
+              <td class="p-3 text-right">
+                <select
+                  class="rounded-lg border border-gray-300 bg-white px-2 py-1 text-gray-800 shadow-sm
+                         focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  [ngModel]="t.status"
+                  (ngModelChange)="changeStatus(t, $event)">
+                  <option>Open</option>
+                  <option>In Progress</option>
+                  <option>Closed</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr *ngIf="items.length===0">
+              <td colspan="5" class="p-6 text-center text-gray-600">Sin resultados</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="text-sm text-gray-600">
+          Página {{ page }} de {{ totalPages }} — {{ total }} registros
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            class="rounded-xl border px-3 py-1.5 text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+            (click)="prev()" [disabled]="page<=1">Anterior</button>
+
+          <button
+            class="rounded-xl border px-3 py-1.5 text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+            (click)="next()" [disabled]="page>=totalPages">Siguiente</button>
+
+          <select
+            class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-gray-800 shadow-sm
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="pageSize" (change)="goto(1)">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div *ngIf="msg"
+           class="mt-3 rounded-xl border px-3 py-2 text-sm"
+           [ngClass]="ok ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'">
+        {{ msg }}
+      </div>
+
     </div>
-    <div class="flex gap-2">
-      <button class="px-3 py-1 border rounded" (click)="prev()" [disabled]="page<=1">Anterior</button>
-      <button class="px-3 py-1 border rounded" (click)="next()" [disabled]="page>=totalPages">Siguiente</button>
-      <select class="border rounded px-2 py-1"
-              [(ngModel)]="pageSize"
-              (change)="goto(1)">
-        <option [ngValue]="10">10</option>
-        <option [ngValue]="20">20</option>
-        <option [ngValue]="50">50</option>
-      </select>
-    </div>
-  </div>
-
-  <p *ngIf="msg" class="mt-2 text-sm" [class.text-green-600]="ok" [class.text-red-600]="!ok">{{ msg }}</p>
-</section>
-
+  </section>
   `
 })
 export class TicketsAdminComponent {
   items: TicketDto[] = [];
 
   page = 1;
-  pageSize = 10;             // 👈 number
+  pageSize = 10;
   total = 0;
   get totalPages(){ return Math.max(1, Math.ceil(this.total / this.pageSize)); }
 

@@ -30,7 +30,7 @@ export const routes: Routes = [
     title: 'Dashboard',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/dashboard/dashboard').then(m => m.Dashboard)
+      import('./features/dashboard/dashboard').then(m => m.DashboardComponent)
   },
 
   {
@@ -106,6 +106,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/purchases/purchases').then(m => m.PurchasesComponent)
   },
+  { path: 'contact', loadComponent: () => import('./features/support/contact').then(m => m.ContactComponent) },
 
 
   /* Fallback */

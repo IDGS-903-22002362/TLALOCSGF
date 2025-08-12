@@ -1,0 +1,54 @@
+<section class="max-w-5xl mx-auto p-6">
+  <h1 class="text-3xl font-bold mb-4">Contacto</h1>
+
+  <!-- Info de la empresa -->
+  <div class="grid md:grid-cols-2 gap-4 mb-6">
+    <div class="rounded-lg border bg-white p-4">
+      <h2 class="font-semibold mb-2">Datos de contacto</h2>
+      <div class="space-y-1 text-sm">
+        <div><b>Empresa:</b> {{ info()?.company }}</div>
+        <div><b>Correo:</b> <a class="text-green-700 underline" [href]="'mailto:'+info()?.email">{{ info()?.email }}</a></div>
+        <div><b>Teléfono:</b> <a class="text-green-700 underline" [href]="'tel:'+info()?.phone">{{ info()?.phone }}</a></div>
+        <div><b>Dirección:</b> {{ info()?.address }}</div>
+        <div><b>Horario:</b> {{ info()?.hours }}</div>
+        <div class="flex gap-3 pt-2">
+          <a *ngIf="info()?.facebook" [href]="info()?.facebook" target="_blank" class="text-sm text-green-700 hover:underline">Facebook</a>
+          <a *ngIf="info()?.instagram" [href]="info()?.instagram" target="_blank" class="text-sm text-green-700 hover:underline">Instagram</a>
+          <a *ngIf="info()?.x" [href]="info()?.x" target="_blank" class="text-sm text-green-700 hover:underline">X</a>
+        </div>
+      </div>
+    </div>
+
+    <iframe *ngIf="info()?.mapsUrl"
+            class="rounded-lg border h-64 w-full"
+            [src]="info()?.mapsUrl | safeUrl">
+    </iframe>
+  </div>
+
+  <!-- Formulario -->
+  <div class="rounded-lg border bg-white p-4">
+    <h2 class="font-semibold mb-3">Envíanos un mensaje</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="grid md:grid-cols-2 gap-4">
+      <input class="border rounded px-3 py-2" placeholder="Nombre completo" formControlName="fullName">
+      <input class="border rounded px-3 py-2" placeholder="Correo" type="email" formControlName="email">
+      <input class="border rounded px-3 py-2" placeholder="Teléfono (opcional)" formControlName="phone">
+      <select class="border rounded px-3 py-2" formControlName="topic">
+        <option>General</option>
+        <option>Ventas</option>
+        <option>Soporte</option>
+      </select>
+      <textarea class="border rounded px-3 py-2 md:col-span-2" rows="5" placeholder="Cuéntanos en qué te ayudamos" formControlName="message"></textarea>
+
+      <label class="md:col-span-2 inline-flex items-center gap-2">
+        <input type="checkbox" formControlName="asTicket"> <span>Si estoy autenticado, abrir ticket de soporte</span>
+      </label>
+
+      <div class="md:col-span-2">
+        <button class="bg-green-600 text-white rounded px-4 py-2" [disabled]="form.invalid">Enviar</button>
+      </div>
+    </form>
+
+    <p *ngIf="msg()" class="mt-3 text-sm" [class.text-green-600]="ok()" [class.text-red-600]="ok()===false">{{ msg() }}</p>
+  </div>
+</section>

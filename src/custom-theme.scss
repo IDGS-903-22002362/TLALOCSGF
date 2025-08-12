@@ -4,6 +4,7 @@
 // components according to the Material 3 design spec.
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
+
 @use '@angular/material' as mat;
 
 html {
@@ -15,6 +16,14 @@ html {
     typography: Roboto,
     density: 0,
   ));
+  /* ✅ responsive para imágenes/vídeos, NO para SVG */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* (opcional) por si queda alguna regla heredada rara */
+svg { max-width: none; }
 
   // Default the application to a light color theme. This can be changed to
   // `dark` to enable the dark color theme, or to `light dark` to defer to the

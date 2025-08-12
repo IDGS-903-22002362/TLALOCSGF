@@ -9,89 +9,160 @@ import { ReportsService, SalesResponse } from '../../core/services/reports';
   selector: 'app-sales-report',
   imports: [CommonModule, FormsModule, NgxEchartsModule],
   template: `
-  <section class="max-w-6xl mx-auto p-6 space-y-4">
-    <h1 class="text-2xl font-bold">Ventas por día</h1>
+  <section class="bg-emerald-50/60 min-h-[80vh]">
+  <div class="mx-auto max-w-6xl px-6 py-8 space-y-5">
+    <h1 class="text-3xl font-extrabold text-gray-900">Ventas por día</h1>
 
-    <!-- Filtros -->
-    <div class="bg-white border rounded p-4 flex flex-wrap gap-3 items-end">
-      <div>
-        <label class="text-sm text-gray-600 block mb-1">Desde</label>
-        <input type="date" class="border rounded px-3 py-2" [(ngModel)]="fromStr">
-      </div>
-      <div>
-        <label class="text-sm text-gray-600 block mb-1">Hasta</label>
-        <input type="date" class="border rounded px-3 py-2" [(ngModel)]="toStr">
-      </div>
+    <!-- Filtros (corregido para que no se salgan los botones) -->
+    <div class="rounded-2xl border bg-white/80 backdrop-blur p-4 shadow ring-1 ring-black/5 overflow-hidden">
+      <div class="grid items-end gap-3 md:grid-cols-12">
+        <!-- Desde -->
+        <div class="col-span-12 md:col-span-3">
+          <label class="mb-1 block text-sm text-gray-600">Desde</label>
+          <input
+            type="date"
+            class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-800
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="fromStr"
+          />
+        </div>
 
-      <div>
-        <label class="text-sm text-gray-600 block mb-1">CustomerId</label>
-        <input class="border rounded px-3 py-2 w-56" [(ngModel)]="customerId" placeholder="Opcional">
-      </div>
+        <!-- Hasta -->
+        <div class="col-span-12 md:col-span-3">
+          <label class="mb-1 block text-sm text-gray-600">Hasta</label>
+          <input
+            type="date"
+            class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-800
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="toStr"
+          />
+        </div>
 
-      <div>
-        <label class="text-sm text-gray-600 block mb-1">ProductId</label>
-        <input type="number" class="border rounded px-3 py-2 w-40" [(ngModel)]="productIdInput" placeholder="Opcional">
-      </div>
+        <!-- CustomerId -->
+        <div class="col-span-12 md:col-span-3">
+          <label class="mb-1 block text-sm text-gray-600">CustomerId</label>
+          <input
+            class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-800
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="customerId"
+            placeholder="Opcional"
+          />
+        </div>
 
-      <label class="inline-flex items-center gap-2 ml-1">
-        <input type="checkbox" class="size-4" [(ngModel)]="useLocalTz">
-        <span class="text-sm">Ajustar a zona local</span>
-      </label>
+        <!-- ProductId -->
+        <div class="col-span-12 md:col-span-2">
+          <label class="mb-1 block text-sm text-gray-600">ProductId</label>
+          <input
+            type="number"
+            class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-800
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="productIdInput"
+            placeholder="Opcional"
+          />
+        </div>
 
-      <button class="bg-green-600 text-white px-4 py-2 rounded" (click)="load()">Aplicar</button>
+        <!-- Ajuste zona -->
+        <div class="col-span-12 md:col-span-1">
+          <label class="mb-1 block text-sm text-transparent select-none">.</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              [(ngModel)]="useLocalTz"
+            />
+            Ajustar a zona local
+          </label>
+        </div>
 
-      <div class="ml-auto flex gap-2">
-        <button class="px-3 py-2 border rounded" (click)="download('csv')">CSV</button>
-        <button class="px-3 py-2 border rounded" (click)="download('pdf')">PDF</button>
+        <!-- Acciones -->
+        <div class="col-span-12 flex flex-wrap items-center justify-end gap-2">
+          <button
+            class="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow
+                   hover:scale-[1.01] hover:bg-emerald-600 active:scale-95"
+            (click)="load()"
+          >
+            Aplicar
+          </button>
+
+          <button
+            class="rounded-xl border px-4 py-2 text-gray-700 hover:bg-gray-50"
+            (click)="reset()"
+          >
+            Reset
+          </button>
+
+          <button
+            class="rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50"
+            (click)="download('csv')"
+          >
+            CSV
+          </button>
+
+          <button
+            class="rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50"
+            (click)="download('pdf')"
+          >
+            PDF
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- KPIs -->
-    <div *ngIf="header()" class="bg-white border rounded p-4 grid sm:grid-cols-3 gap-4">
-      <div>
+    <div *ngIf="header(); else kpisSkeleton" class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-2xl border bg-white/90 p-4 shadow-sm ring-1 ring-black/5">
         <div class="text-xs text-gray-500">Órdenes</div>
-        <div class="text-xl font-semibold">{{ header()?.orders }}</div>
+        <div class="mt-1 text-2xl font-semibold text-gray-900">{{ header()?.orders }}</div>
       </div>
-      <div>
+      <div class="rounded-2xl border bg-white/90 p-4 shadow-sm ring-1 ring-black/5">
         <div class="text-xs text-gray-500">Unidades</div>
-        <div class="text-xl font-semibold">{{ header()?.units }}</div>
+        <div class="mt-1 text-2xl font-semibold text-gray-900">{{ header()?.units }}</div>
       </div>
-      <div>
+      <div class="rounded-2xl border bg-white/90 p-4 shadow-sm ring-1 ring-black/5">
         <div class="text-xs text-gray-500">Total</div>
-        <div class="text-xl font-semibold">{{ header()?.total | currency }}</div>
+        <div class="mt-1 text-2xl font-semibold text-emerald-700">{{ header()?.total | currency }}</div>
       </div>
     </div>
+    <ng-template #kpisSkeleton>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="h-20 animate-pulse rounded-2xl bg-gray-200/60"></div>
+        <div class="h-20 animate-pulse rounded-2xl bg-gray-200/60"></div>
+        <div class="h-20 animate-pulse rounded-2xl bg-gray-200/60"></div>
+      </div>
+    </ng-template>
 
     <!-- Gráfica -->
-    <div class="bg-white border rounded p-4">
-      <div echarts [options]="chartOpt" class="w-full" style="height: 360px;"></div>
+    <div class="rounded-2xl border bg-white/90 p-4 shadow ring-1 ring-black/5">
+      <div echarts [options]="chartOpt" class="w-full" style="height: 380px;"></div>
     </div>
 
     <!-- Tabla -->
-    <div class="overflow-x-auto border rounded">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-50">
+    <div class="overflow-x-auto rounded-2xl border bg-white/90 shadow ring-1 ring-black/5">
+      <table class="min-w-full text-sm text-gray-800">
+        <thead class="bg-gray-50/80 text-gray-600">
           <tr>
-            <th class="p-2 text-left">Fecha</th>
-            <th class="p-2 text-right">Órdenes</th>
-            <th class="p-2 text-right">Unidades</th>
-            <th class="p-2 text-right">Total</th>
+            <th class="p-3 text-left font-semibold">Fecha</th>
+            <th class="p-3 text-right font-semibold">Órdenes</th>
+            <th class="p-3 text-right font-semibold">Unidades</th>
+            <th class="p-3 text-right font-semibold">Total</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let r of rows()" class="border-t">
-            <td class="p-2">{{ r.date | date:'yyyy-MM-dd' }}</td>
-            <td class="p-2 text-right">{{ r.orders }}</td>
-            <td class="p-2 text-right">{{ r.units }}</td>
-            <td class="p-2 text-right">{{ r.total | currency }}</td>
+          <tr *ngFor="let r of rows()" class="border-t hover:bg-gray-50/50">
+            <td class="p-3">{{ r.date | date:'yyyy-MM-dd' }}</td>
+            <td class="p-3 text-right">{{ r.orders }}</td>
+            <td class="p-3 text-right">{{ r.units }}</td>
+            <td class="p-3 text-right">{{ r.total | currency }}</td>
           </tr>
           <tr *ngIf="!rows().length">
-            <td colspan="4" class="p-4 text-center text-gray-500">Sin datos</td>
+            <td colspan="4" class="p-6 text-center text-gray-600">Sin datos</td>
           </tr>
         </tbody>
       </table>
     </div>
-  </section>
+  </div>
+</section>
+
   `
 })
 export class SalesReportComponent {
@@ -103,7 +174,7 @@ export class SalesReportComponent {
   useLocalTz = true;
 
   customerId = '';
-  productIdInput = ''; // cadena para no pelear con ngModel/number
+  productIdInput = '';
 
   header = signal<SalesResponse['header'] | null>(null);
   rows   = signal<SalesResponse['rows']>([]);
@@ -111,21 +182,27 @@ export class SalesReportComponent {
 
   ngOnInit() { this.load(); }
 
+  reset() {
+    this.fromStr = this.toISODate(new Date(Date.now() - 29 * 86400000));
+    this.toStr   = this.toISODate(new Date());
+    this.customerId = '';
+    this.productIdInput = '';
+    this.useLocalTz = true;
+    this.load();
+  }
+
   load() {
     const from = this.fromStr ? new Date(this.fromStr) : undefined;
     const to   = this.toStr   ? new Date(this.toStr)   : undefined;
     const tzOffset = this.useLocalTz ? -new Date().getTimezoneOffset() : undefined;
     const productId = this.productIdInput ? Number(this.productIdInput) : undefined;
 
-    this.api.getSales({
-      from, to, tzOffset,
-      customerId: this.customerId || undefined,
-      productId
-    }).subscribe(res => {
-      this.header.set(res.header);
-      this.rows.set(res.rows);
-      this.chartOpt = this.buildChart(res.rows);
-    });
+    this.api.getSales({ from, to, tzOffset, customerId: this.customerId || undefined, productId })
+      .subscribe(res => {
+        this.header.set(res.header);
+        this.rows.set(res.rows);
+        this.chartOpt = this.buildChart(res.rows);
+      });
   }
 
   download(fmt: 'csv'|'pdf') {
@@ -134,20 +211,17 @@ export class SalesReportComponent {
     const tzOffset = this.useLocalTz ? -new Date().getTimezoneOffset() : undefined;
     const productId = this.productIdInput ? Number(this.productIdInput) : undefined;
 
-    this.api.exportSales(fmt, {
-      from, to, tzOffset,
-      customerId: this.customerId || undefined,
-      productId
-    }).subscribe(res => {
-      const blob = res.body as Blob;
-      const cd = res.headers.get('Content-Disposition') || '';
-      const match = /filename="?([^"]+)"?/i.exec(cd);
-      const filename = match?.[1] ?? `sales.${fmt}`;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-    });
+    this.api.exportSales(fmt, { from, to, tzOffset, customerId: this.customerId || undefined, productId })
+      .subscribe(res => {
+        const blob = res.body as Blob;
+        const cd = res.headers.get('Content-Disposition') || '';
+        const match = /filename="?([^"]+)"?/i.exec(cd);
+        const filename = match?.[1] ?? `sales.${fmt}`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+      });
   }
 
   private buildChart(rows: SalesResponse['rows']) {
@@ -155,20 +229,64 @@ export class SalesReportComponent {
     const totals = rows.map(r => r.total);
     const orders = rows.map(r => r.orders);
 
+    // colores consistentes con la marca
+    const emerald = '#059669';
+    const emeraldLight = '#A7F3D0';
+    const gray600 = '#4B5563';
+
     return {
       tooltip: { trigger: 'axis' },
       legend: { data: ['Total', 'Órdenes'] },
-      dataZoom: [{ type: 'inside' }, { type: 'slider' }],
-      xAxis: { type: 'category', data: dates, boundaryGap: false },
+      dataZoom: [
+        { type: 'inside' },
+        { type: 'slider', height: 22, bottom: 8 }
+      ], /* dataZoom recomendado para explorar series largas */ /* :contentReference[oaicite:1]{index=1} */
+      grid: { left: 48, right: 40, top: 36, bottom: 60 },
+
+      xAxis: {
+        type: 'category',
+        data: dates,
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: '#E5E7EB' } },
+        axisLabel: { color: gray600 }
+      },
+
       yAxis: [
-        { type: 'value', name: 'Total' },
-        { type: 'value', name: 'Órdenes' }
-      ],
+        { type: 'value', name: 'Total', axisLabel: { color: gray600 }, splitLine: { lineStyle: { color: '#F3F4F6' } } },
+        { type: 'value', name: 'Órdenes', axisLabel: { color: gray600 }, splitLine: { show: false } }
+      ], /* doble eje para magnitudes distintas, soportado por ECharts */ /* :contentReference[oaicite:2]{index=2} */
+
       series: [
-        { name: 'Total', type: 'line', smooth: true, yAxisIndex: 0, areaStyle: {}, data: totals },
-        { name: 'Órdenes', type: 'bar', yAxisIndex: 1, data: orders, barWidth: '50%' }
-      ],
-      grid: { left: 50, right: 40, top: 40, bottom: 60 }
+        {
+          name: 'Total',
+          type: 'line',
+          smooth: true,
+          yAxisIndex: 0,
+          symbol: 'circle',
+          symbolSize: 6,
+          itemStyle: { color: emerald },
+          lineStyle: { width: 3, color: emerald },
+          areaStyle: {
+            // degradado del área bajo la línea
+            color: {
+              type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(5,150,105,0.28)' },
+                { offset: 1, color: 'rgba(5,150,105,0.03)' }
+              ]
+            }
+          }, /* areaStyle para líneas de área */ /* :contentReference[oaicite:3]{index=3} */
+          data: totals
+        },
+        {
+          name: 'Órdenes',
+          type: 'bar',
+          yAxisIndex: 1,
+          data: orders,
+          barWidth: '48%',
+          itemStyle: { color: emeraldLight, borderRadius: [6, 6, 0, 0] }
+        }
+      ]
     };
   }
 

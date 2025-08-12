@@ -2,10 +2,10 @@
 <div class="min-h-screen from-emerald-200/70 to-emerald-50">
 
   <!-- Contenedor principal -->
-  <div class="w-full bg-white shadow-xl ring-1 ring-black/5">
+  <div class="relative z-50 w-full bg-white shadow-xl ring-1 ring-black/5">
 
-    <!-- NAVBAR (Flowbite-like) -->
-    <nav class="mx-auto z-10 flex items-center justify-between px-6 py-4 md:px-10">
+    <!-- NAVBAR -->
+    <nav class="relative mx-auto z-50 flex items-center justify-between px-6 py-4 md:px-10">
       <!-- Logo -->
       <a routerLink="/" class="flex items-center gap-2">
         <img src="/img/LogoMenu.png" alt="logo" class="h-15 w-15 object-contain" />
@@ -13,7 +13,9 @@
       </a>
 
       <!-- Botón mobile -->
-      <button data-collapse-toggle="main-menu" type="button"
+      <button
+        data-collapse-toggle="main-menu"
+        type="button"
         class="inline-flex items-center rounded-lg p-2 text-gray-600 hover:bg-gray-100 focus:outline-none md:hidden"
         aria-controls="main-menu" aria-expanded="false">
         <span class="sr-only">Abrir menú</span>
@@ -25,36 +27,37 @@
       <!-- Items -->
       <div id="main-menu" class="hidden w-full items-center justify-between md:flex md:w-auto">
         <ul class="mt-4 flex flex-col gap-1 md:mt-0 md:flex-row md:items-center md:gap-6">
-          <li><a routerLink="/" class="nav-link text-gray-700 hover:text-emerald-700">Inicio</a></li>
-          <li><a routerLink="/products" class="nav-link text-gray-700 hover:text-emerald-700">Producto</a></li>
+          <li><a routerLink="/" class="nav-link">Inicio</a></li>
+          <li><a routerLink="/products" class="nav-link">Producto</a></li>
 
-          <!-- Cotiza: si no está logueado manda a /auth, si sí a /quotes (o donde crees la cotización) -->
+          <!-- Cotiza -->
           <li>
-            <a [routerLink]="auth.isLoggedIn() ? '/quotes' : '/auth'"
-              class="nav-link text-gray-700 hover:text-emerald-700">Cotiza</a>
+            <a [routerLink]="auth.isLoggedIn() ? '/quotes' : '/auth'" class="nav-link">Cotiza</a>
           </li>
 
-          <li><a routerLink="/support/faqs" class="nav-link text-gray-700 hover:text-emerald-700">FAQ</a></li>
+          <li><a routerLink="/support/faqs" class="nav-link">FAQ</a></li>
 
-          <!-- Contacto = tickets: público manda a login, clientes ven sus tickets -->
+          <!-- Contacto = tickets -->
           <li>
-            <a [routerLink]="auth.isLoggedIn() ? '/support/tickets' : '/auth'"
-              class="nav-link text-gray-700 hover:text-emerald-700">Contacto</a>
+            <a [routerLink]="auth.isLoggedIn() ? '/support/tickets' : '/auth'" class="nav-link">Contacto</a>
           </li>
 
-          <!-- Solo ADMIN -->
-          <li *ngIf="auth.roles?.includes('Admin')" class="relative group">
-            <button type="button" class="nav-link inline-flex items-center gap-1 text-gray-700 hover:text-emerald-700">
+          <!-- Solo ADMIN (dropdown con Flowbite) -->
+          <li *ngIf="auth.roles?.includes('Admin')" class="relative">
+            <button
+              id="adminMenuBtn"
+              data-dropdown-toggle="adminMenu"
+              data-dropdown-placement="bottom-end"
+              type="button"
+              class="nav-link inline-flex items-center gap-1">
               Admin
-              <svg class="h-4 w-4 transition-transform group-hover:rotate-180" viewBox="0 0 20 20" fill="currentColor">
+              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
                   clip-rule="evenodd" />
               </svg>
             </button>
-            <!-- dropdown -->
-            <div
-              class="invisible absolute right-0 mt-2 w-48 translate-y-2 rounded-xl border bg-white p-2 opacity-0 shadow-lg ring-1 ring-black/5 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+            <div id="adminMenu" role="menu" aria-labelledby="adminMenuBtn" class="dropdown-menu hidden z-50">
               <a routerLink="/dashboard" class="dropdown-item">Dashboard</a>
               <a routerLink="/users" class="dropdown-item">Usuarios</a>
               <a routerLink="/reports" class="dropdown-item">Reportes</a>
@@ -66,29 +69,45 @@
           <li class="flex items-center gap-3 md:ml-4">
             <!-- CTA “Solicitar cotización” -->
             <a [routerLink]="auth.isLoggedIn() ? '/quotes' : '/auth'"
-              class="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-md transition hover:scale-[1.02] hover:bg-emerald-600 active:scale-95">
+               class="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-md transition hover:scale-[1.02] hover:bg-emerald-600 active:scale-95">
               Solicitar cotización
             </a>
 
             <!-- Login / Usuario -->
             <ng-container *ngIf="!auth.isLoggedIn(); else userMenu">
               <a routerLink="/auth"
-                class="rounded-xl border border-emerald-700 px-4 py-2 font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                 class="rounded-xl border border-emerald-700 px-4 py-2 font-semibold text-emerald-700 transition hover:bg-emerald-50">
                 Login
               </a>
             </ng-container>
             <ng-template #userMenu>
-              <div class="relative group">
-                <button type="button"
-                  class="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50">
-                  <span class="i-lucide-user h-4 w-4"></span>
+              <div class="relative">
+                <button
+                  id="userMenuBtn"
+                  data-dropdown-toggle="userMenu"
+                  data-dropdown-placement="bottom-end"
+                  type="button"
+                  class="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M16 14a4 4 0 10-8 0m8 0a4 4 0 01-8 0m8 0v1a7 7 0 11-14 0v-1a7 7 0 1114 0z"/>
+                  </svg>
                   Mi cuenta
+                  <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                          d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                          clip-rule="evenodd" />
+                  </svg>
                 </button>
-                <div
-                  class="invisible absolute right-0 mt-2 w-44 translate-y-2 rounded-xl border bg-white p-2 opacity-0 shadow-lg ring-1 ring-black/5 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+
+                <!-- Menú usuario -->
+                <div id="userMenu" role="menu" aria-labelledby="userMenuBtn" class="dropdown-menu hidden z-50">
                   <a routerLink="/support/tickets" class="dropdown-item">Mis tickets</a>
                   <a routerLink="/quotes" class="dropdown-item">Mis cotizaciones</a>
-                  <button type="button" (click)="logout()" class="dropdown-item text-red-600">Salir</button>
+                  <a routerLink="/profile" class="dropdown-item">Mi perfil</a>
+                  <div class="dropdown-sep"></div>
+                  <button type="button" (click)="logout()" class="dropdown-item dropdown-item--danger">Salir</button>
                 </div>
               </div>
             </ng-template>
@@ -98,12 +117,10 @@
     </nav>
 
     <!-- HERO -->
-    <section class="relative h-[90vh] min-h-[600px] overflow-hidden ">
+    <section class="relative h-[90vh] min-h-[600px] overflow-hidden">
       <!-- Video de fondo -->
-      <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+      <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none">
         <source src="/video/fondoVideo.mp4" type="video/mp4">
-        <!-- Fallback para navegadores que no soportan video -->
-        
       </video>
 
       <!-- Contenido del hero -->
@@ -119,7 +136,6 @@
               Revolucionario sistema ecológico que combina riego de precisión con energía renovable. 
               Cuida tu jardín y el planeta mientras ahorras agua con control remoto.
             </p>
-            
           </div>
         </div>
       </div>
@@ -131,12 +147,12 @@
         </svg>
       </div>
     </section>
+
     <section class="relative overflow-hidden px-6 pb-10 pt-6 md:px-10 md:pt-10">
       <div class="grid items-center gap-10 md:grid-cols-2">
         <!-- Texto -->
         <div class="space-y-6">
-          <h1
-            class="text-4xl font-extrabold tracking-tight text-gray-800 sm:text-5xl lg:text-6xl">
+          <h1 class="text-4xl font-extrabold tracking-tight text-gray-800 sm:text-5xl lg:text-6xl">
             Riega Inteligente,
             <span class="block text-emerald-700">Vive Verde</span>
           </h1>
@@ -148,8 +164,7 @@
             <a [routerLink]="auth.isLoggedIn() ? '/quotes' : '/auth'"
                class="group inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white shadow-md transition hover:scale-[1.02] hover:bg-emerald-600 active:scale-95">
               Solicitar cotización
-              <svg class="h-4 w-4 transition group-hover:translate-x-0.5"
-                   viewBox="0 0 20 20" fill="currentColor">
+              <svg class="h-4 w-4 transition group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                       d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 01-1.414 1.414L12 6.414V17a1 1 0 11-2 0V6.414L6.707 9.707A1 1 0 015.293 8.293l5-5z"
                       clip-rule="evenodd"/>
@@ -171,23 +186,19 @@
 
         <!-- Imagen -->
         <div class="relative">
-          <div
-            class="mx-auto aspect-[4/3] w-full max-w-md overflow-hidden rounded-3xl border bg-emerald-50 shadow-inner transition hover:shadow-lg">
-            <img src="/img/maqueta.jpg" alt="Sistema de riego"
-                 class="h-full w-full scale-100 object-contain transition duration-500 hover:scale-105"/>
+          <div class="mx-auto aspect-[4/3] w-full max-w-md overflow-hidden rounded-3xl border bg-emerald-50 shadow-inner transition hover:shadow-lg">
+            <img src="/img/maqueta.jpg" alt="Sistema de riego" class="h-full w-full scale-100 object-contain transition duration-500 hover:scale-105"/>
           </div>
-          <!-- blob decorativo -->
+          <!-- blobs -->
           <div class="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-emerald-200/60 blur-2xl"></div>
           <div class="pointer-events-none absolute -bottom-10 -right-8 h-32 w-32 rounded-full bg-emerald-300/50 blur-2xl"></div>
         </div>
       </div>
     </section>
-    
 
     <!-- FEATURES -->
     <section class="px-6 pb-12 md:px-10">
       <div class="grid gap-6 md:grid-cols-3">
-        <!-- Card -->
         <a routerLink="/products" class="feature-card group">
           <div class="feature-icon bg-emerald-600/10">
             <img src="/img/autosustentable.png" class="h-8 w-8 object-contain" alt="">
@@ -220,7 +231,7 @@
       </div>
     </section>
 
-    <!-- BLOQUE ADMIN (solo para Admin) -->
+    <!-- BLOQUE ADMIN -->
     <section *ngIf="auth.roles?.includes('Admin')" class="px-6 pb-12 md:px-10">
       <h2 class="mb-4 text-xl font-semibold text-gray-800">Panel rápido (Admin)</h2>
       <div class="grid gap-4 md:grid-cols-4">
@@ -277,7 +288,6 @@
 <!-- COMENTARIOS Y VALORACIONES DE CLIENTES -->
 <app-product-reviews [productId]="1"></app-product-reviews>
 
-
 <!-- PREGUNTAS FRECUENTES -->
 <section class="px-6 py-12 md:px-10 bg-white">
   <div class="max-w-4xl mx-auto">
@@ -299,124 +309,45 @@
   </div>
 </section>
 
-
 <footer class="bg-white dark:bg-gray-900">
-    <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
-        <div class="md:flex md:justify-between">
-          <div class="mb-6 md:mb-0">
-              <a href="#" class="flex items-center">
-                  <img src="/img/LogoMenu.png" class="h-8 me-3" alt="FlowBite Logo" />
-                  <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Tlaloc's Garden</span>
-              </a>
-          </div>
-          <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
-              <div>
-                  <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Resources</h2>
-                  <ul class="text-gray-500 dark:text-gray-400 font-medium">
-                      <li class="mb-4">
-                          <a href="https://flowbite.com/" class="hover:underline">Flowbite</a>
-                      </li>
-                      <li>
-                          <a href="https://tailwindcss.com/" class="hover:underline">Tailwind CSS</a>
-                      </li>
-                  </ul>
-              </div>
-              <div>
-                  <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Follow us</h2>
-                  <ul class="text-gray-500 dark:text-gray-400 font-medium">
-                      <li class="mb-4">
-                          <a href="https://github.com/themesberg/flowbite" class="hover:underline ">Github</a>
-                      </li>
-                      <li>
-                          <a href="https://discord.gg/4eeurUVvTy" class="hover:underline">Discord</a>
-                      </li>
-                  </ul>
-              </div>
-              <div>
-                  <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Legal</h2>
-                  <ul class="text-gray-500 dark:text-gray-400 font-medium">
-                      <li class="mb-4">
-                          <a href="#" class="hover:underline">Privacy Policy</a>
-                      </li>
-                      <li>
-                          <a href="#" class="hover:underline">Terms &amp; Conditions</a>
-                      </li>
-                  </ul>
-              </div>
-          </div>
+  <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
+    <div class="md:flex md:justify-between">
+      <div class="mb-6 md:mb-0">
+        <a href="#" class="flex items-center">
+          <img src="/img/LogoMenu.png" class="h-8 me-3" alt="FlowBite Logo" />
+          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Tlaloc's Garden</span>
+        </a>
       </div>
-      <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-      <div class="sm:flex sm:items-center sm:justify-between">
-          <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2023 <a href="https://flowbite.com/" class="hover:underline">Flowbite™</a>. All Rights Reserved.
-          </span>
-          <div class="flex mt-4 sm:justify-center sm:mt-0">
-              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
-                  <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 8 19">
-                        <path fill-rule="evenodd" d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z" clip-rule="evenodd"/>
-                    </svg>
-                  <span class="sr-only">Facebook page</span>
-              </a>
-              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5">
-                  <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
-                        <path d="M16.942 1.556a16.3 16.3 0 0 0-4.126-1.3 12.04 12.04 0 0 0-.529 1.1 15.175 15.175 0 0 0-4.573 0 11.585 11.585 0 0 0-.535-1.1 16.274 16.274 0 0 0-4.129 1.3A17.392 17.392 0 0 0 .182 13.218a15.785 15.785 0 0 0 4.963 2.521c.41-.564.773-1.16 1.084-1.785a10.63 10.63 0 0 1-1.706-.83c.143-.106.283-.217.418-.33a11.664 11.664 0 0 0 10.118 0c.137.113.277.224.418.33-.544.328-1.116.606-1.71.832a12.52 12.52 0 0 0 1.084 1.785 16.46 16.46 0 0 0 5.064-2.595 17.286 17.286 0 0 0-2.973-11.59ZM6.678 10.813a1.941 1.941 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.919 1.919 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Zm6.644 0a1.94 1.94 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.918 1.918 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Z"/>
-                    </svg>
-                  <span class="sr-only">Discord community</span>
-              </a>
-              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5">
-                  <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 17">
-                    <path fill-rule="evenodd" d="M20 1.892a8.178 8.178 0 0 1-2.355.635 4.074 4.074 0 0 0 1.8-2.235 8.344 8.344 0 0 1-2.605.98A4.13 4.13 0 0 0 13.85 0a4.068 4.068 0 0 0-4.1 4.038 4 4 0 0 0 .105.919A11.705 11.705 0 0 1 1.4.734a4.006 4.006 0 0 0 1.268 5.392 4.165 4.165 0 0 1-1.859-.5v.05A4.057 4.057 0 0 0 4.1 9.635a4.19 4.19 0 0 1-1.856.07 4.108 4.108 0 0 0 3.831 2.807A8.36 8.36 0 0 1 0 14.184 11.732 11.732 0 0 0 6.291 16 11.502 11.502 0 0 0 17.964 4.5c0-.177 0-.35-.012-.523A8.143 8.143 0 0 0 20 1.892Z" clip-rule="evenodd"/>
-                </svg>
-                  <span class="sr-only">Twitter page</span>
-              </a>
-              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5">
-                  <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.18.572.681.475A9.911 9.911 0 0 0 10 .333Z" clip-rule="evenodd"/>
-                  </svg>
-                  <span class="sr-only">GitHub account</span>
-              </a>
-              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5">
-                  <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 0a10 10 0 1 0 10 10A10.009 10.009 0 0 0 10 0Zm6.613 4.614a8.523 8.523 0 0 1 1.93 5.32 20.094 20.094 0 0 0-5.949-.274c-.059-.149-.122-.292-.184-.441a23.879 23.879 0 0 0-.566-1.239 11.41 11.41 0 0 0 4.769-3.366ZM8 1.707a8.821 8.821 0 0 1 2-.238 8.5 8.5 0 0 1 5.664 2.152 9.608 9.608 0 0 1-4.476 3.087A45.758 45.758 0 0 0 8 1.707ZM1.642 8.262a8.57 8.57 0 0 1 4.73-5.981A53.998 53.998 0 0 1 9.54 7.222a32.078 32.078 0 0 1-7.9 1.04h.002Zm2.01 7.46a8.51 8.51 0 0 1-2.2-5.707v-.262a31.64 31.64 0 0 0 8.777-1.219c.243.477.477.964.692 1.449-.114.032-.227.067-.336.1a13.569 13.569 0 0 0-6.942 5.636l.009.003ZM10 18.556a8.508 8.508 0 0 1-5.243-1.8 11.717 11.717 0 0 1 6.7-5.332.509.509 0 0 1 .055-.02 35.65 35.65 0 0 1 1.819 6.476 8.476 8.476 0 0 1-3.331.676Zm4.772-1.462A37.232 37.232 0 0 0 13.113 11a12.513 12.513 0 0 1 5.321.364 8.56 8.56 0 0 1-3.66 5.73h-.002Z" clip-rule="evenodd"/>
-                </svg>
-                  <span class="sr-only">Dribbble account</span>
-              </a>
-          </div>
+      <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+        <div>
+          <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Resources</h2>
+          <ul class="text-gray-500 dark:text-gray-400 font-medium">
+            <li class="mb-4"><a href="https://flowbite.com/" class="hover:underline">Flowbite</a></li>
+            <li><a href="https://tailwindcss.com/" class="hover:underline">Tailwind CSS</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Follow us</h2>
+          <ul class="text-gray-500 dark:text-gray-400 font-medium">
+            <li class="mb-4"><a href="https://github.com/themesberg/flowbite" class="hover:underline">Github</a></li>
+            <li><a href="https://discord.gg/4eeurUVvTy" class="hover:underline">Discord</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Legal</h2>
+          <ul class="text-gray-500 dark:text-gray-400 font-medium">
+            <li class="mb-4"><a href="#" class="hover:underline">Privacy Policy</a></li>
+            <li><a href="#" class="hover:underline">Terms &amp; Conditions</a></li>
+          </ul>
+        </div>
       </div>
     </div>
+    <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+    <div class="sm:flex sm:items-center sm:justify-between">
+      <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2023 <a href="https://flowbite.com/" class="hover:underline">Flowbite™</a>. All Rights Reserved.</span>
+      <div class="flex mt-4 sm:justify-center sm:mt-0">
+        <!-- social icons... -->
+      </div>
+    </div>
+  </div>
 </footer>
-
-
-<!-- utilidades tailwind para componentes -->
-<style>
-  .nav-link {
-    @apply rounded-lg px-2 py-1 text-sm font-medium transition;
-  }
-
-  .dropdown-item {
-    @apply block rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50;
-  }
-
-  .badge {
-    @apply rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700;
-  }
-
-  .feature-card {
-    @apply flex items-start gap-3 rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md;
-  }
-
-  .feature-icon {
-    @apply flex h-10 w-10 items-center justify-center rounded-xl text-emerald-700;
-  }
-
-  .feature-title {
-    @apply text-base font-semibold text-gray-800;
-  }
-
-  .feature-desc {
-    @apply text-sm text-gray-600;
-  }
-
-  .admin-card {
-    @apply rounded-2xl border p-4 text-center font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-50 hover:shadow-md;
-  }
-</style>

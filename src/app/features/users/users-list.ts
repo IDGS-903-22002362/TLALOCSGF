@@ -6,159 +6,241 @@ import { UsersService, UserSummary, UserCreateDto, UserUpdateDto } from '../../c
 @Component({
   standalone: true,
   selector: 'app-users-list',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   template: `
-  <section class="p-6 max-w-6xl mx-auto">
-    <header class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-4">
-      <h1 class="text-2xl font-bold">Usuarios</h1>
+  <section class="bg-emerald-50/60 min-h-[80vh]">
+    <div class="mx-auto max-w-6xl px-6 py-10">
 
-      <div class="flex flex-wrap gap-2 items-end">
-        <input class="border rounded px-3 py-2" type="text" [(ngModel)]="search" placeholder="Buscar nombre o correo" (keyup.enter)="reload()"/>
-        <select class="border rounded px-3 py-2" [(ngModel)]="role" (change)="reload()">
-          <option value="">Todos los roles</option>
-          <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
-        </select>
-        <select class="border rounded px-3 py-2" [(ngModel)]="activeStr" (change)="reload()">
-          <option value="">Todos</option>
-          <option value="true">Activos</option>
-          <option value="false">Inactivos</option>
-        </select>
-        <button class="px-4 py-2 bg-gray-100 border rounded" (click)="clearFilters()">Limpiar</button>
-        <button class="px-4 py-2 bg-green-600 text-white rounded" (click)="openCreate()">Nuevo</button>
-      </div>
-    </header>
+      <!-- Header + filtros -->
+      <header class="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <h1 class="text-3xl font-extrabold text-gray-900">Usuarios</h1>
 
-    <!-- Tabla -->
-    <div class="overflow-x-auto border rounded">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="p-2 text-left">Nombre</th>
-            <th class="p-2 text-left">Correo</th>
-            <th class="p-2 text-left">Rol(es)</th>
-            <th class="p-2 text-center">Estado</th>
-            <th class="p-2 text-right">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let u of items" class="border-t">
-            <td class="p-2">{{ u.fullName }}</td>
-            <td class="p-2">{{ u.email }}</td>
-            <td class="p-2">
-              <span class="inline-flex gap-1 flex-wrap">
-                <span *ngFor="let r of u.roles" class="px-2 py-0.5 bg-gray-200 rounded">{{ r }}</span>
-              </span>
-            </td>
-            <td class="p-2 text-center">
-              <span [class.bg-green-100]="u.isActive" [class.text-green-700]="u.isActive"
-                    [class.bg-red-100]="!u.isActive" [class.text-red-700]="!u.isActive"
-                    class="px-2 py-0.5 inline-block rounded">
-                {{ u.isActive ? 'Activo' : 'Inactivo' }}
-              </span>
-            </td>
-            <td class="p-2 text-right">
-              <div class="inline-flex gap-2">
-                <button class="text-blue-600 hover:underline" (click)="openEdit(u)">Editar</button>
-                <button class="text-indigo-600 hover:underline" (click)="openRole(u)">Rol</button>
-                <button class="text-yellow-700 hover:underline" (click)="reset(u)" [disabled]="busy">Reset pass</button>
-                <button class="text-red-600 hover:underline" *ngIf="u.isActive" (click)="deactivate(u)" [disabled]="busy">Desactivar</button>
-                <button class="text-green-700 hover:underline" *ngIf="!u.isActive" (click)="activate(u)" [disabled]="busy">Activar</button>
-              </div>
-            </td>
-          </tr>
-
-          <tr *ngIf="items.length === 0">
-            <td colspan="5" class="p-4 text-center text-gray-500">Sin resultados</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Paginación -->
-    <div class="mt-3 flex items-center justify-between">
-      <div class="text-sm text-gray-600">
-        Página {{ page }} de {{ totalPages }} — {{ total }} registros
-      </div>
-      <div class="flex gap-2">
-        <button class="px-3 py-1 border rounded" (click)="prev()" [disabled]="page<=1">Anterior</button>
-        <button class="px-3 py-1 border rounded" (click)="next()" [disabled]="page>=totalPages">Siguiente</button>
-        <select class="border rounded px-2 py-1" [(ngModel)]="pageSize" (change)="goto(1)">
-          <option [value]="10">10</option>
-          <option [value]="20">20</option>
-          <option [value]="50">50</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Mensaje -->
-    <p *ngIf="msg" class="mt-2 text-sm" [class.text-green-600]="ok" [class.text-red-600]="!ok">{{ msg }}</p>
-
-    <!-- Modal CREAR -->
-    <div *ngIf="showCreate" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div class="bg-white rounded p-4 w-full max-w-md">
-        <h3 class="text-lg font-semibold mb-3">Nuevo usuario</h3>
-        <form [formGroup]="createForm" (ngSubmit)="confirmCreate()">
-          <div class="space-y-3">
-            <input class="w-full border rounded px-3 py-2" placeholder="Nombre completo" formControlName="fullName">
-            <input class="w-full border rounded px-3 py-2" placeholder="Correo" type="email" formControlName="email">
-            <input class="w-full border rounded px-3 py-2" placeholder="Teléfono (opcional)" formControlName="phoneNumber">
-            <select class="w-full border rounded px-3 py-2" formControlName="role">
-              <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
-            </select>
-            <input class="w-full border rounded px-3 py-2" placeholder="Contraseña (opcional)" type="text" formControlName="password">
+        <div class="flex flex-wrap items-end gap-2">
+          <div class="relative">
+            <span class="pointer-events-none absolute inset-y-0 left-3 my-auto text-gray-400">
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l3.387 3.387a1 1 0 01-1.414 1.414l-3.387-3.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <input
+              class="w-64 rounded-2xl border border-gray-300 bg-white/90 px-10 py-2.5 text-gray-800 shadow-sm
+                     focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              type="text" [(ngModel)]="search" placeholder="Buscar nombre o correo" (keyup.enter)="reload()" />
+            <button *ngIf="search"
+              class="absolute right-2 inset-y-0 my-auto rounded-md px-2 py-1 text-gray-500 hover:bg-gray-100"
+              (click)="search=''; reload()">
+              Limpiar
+            </button>
           </div>
-          <div class="mt-4 flex justify-end gap-2">
-            <button type="button" class="px-4 py-2 border rounded" (click)="closeCreate()">Cancelar</button>
-            <button class="px-4 py-2 bg-green-600 text-white rounded" [disabled]="createForm.invalid || busy">Crear</button>
-          </div>
-        </form>
-      </div>
-    </div>
 
-    <!-- Modal EDITAR -->
-    <div *ngIf="showEdit" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div class="bg-white rounded p-4 w-full max-w-md">
-        <h3 class="text-lg font-semibold mb-3">Editar usuario</h3>
-        <form [formGroup]="editForm" (ngSubmit)="confirmEdit()">
-          <div class="space-y-3">
-            <input class="w-full border rounded px-3 py-2" placeholder="Nombre completo" formControlName="fullName">
-            <input class="w-full border rounded px-3 py-2" placeholder="Teléfono (opcional)" formControlName="phoneNumber">
-            <label class="inline-flex items-center gap-2">
-              <input type="checkbox" formControlName="isActive"> <span>Activo</span>
-            </label>
-          </div>
-          <div class="mt-4 flex justify-end gap-2">
-            <button type="button" class="px-4 py-2 border rounded" (click)="closeEdit()">Cancelar</button>
-            <button class="px-4 py-2 bg-blue-600 text-white rounded" [disabled]="editForm.invalid || busy">Guardar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal CAMBIAR ROL -->
-    <div *ngIf="showRole" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div class="bg-white rounded p-4 w-full max-w-sm">
-        <h3 class="text-lg font-semibold mb-3">Cambiar rol</h3>
-        <div class="space-y-3">
-          <select class="w-full border rounded px-3 py-2" [(ngModel)]="roleToSet">
+          <select
+            class="rounded-xl border border-gray-300 bg-white/90 px-3 py-2 text-gray-800 shadow-sm
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="role" (change)="reload()">
+            <option value="">Todos los roles</option>
             <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
           </select>
+
+          <select
+            class="rounded-xl border border-gray-300 bg-white/90 px-3 py-2 text-gray-800 shadow-sm
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="activeStr" (change)="reload()">
+            <option value="">Todos</option>
+            <option value="true">Activos</option>
+            <option value="false">Inactivos</option>
+          </select>
+
+          <button
+            class="rounded-xl border px-4 py-2 text-gray-700 shadow-sm transition hover:bg-gray-50"
+            (click)="clearFilters()">
+            Limpiar
+          </button>
+
+          <button
+            class="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-md transition
+                   hover:scale-[1.01] hover:bg-emerald-600 active:scale-95"
+            (click)="openCreate()">
+            Nuevo
+          </button>
         </div>
-        <div class="mt-4 flex justify-end gap-2">
-          <button class="px-4 py-2 border rounded" (click)="closeRole()">Cancelar</button>
-          <button class="px-4 py-2 bg-indigo-600 text-white rounded" (click)="confirmRole()" [disabled]="busy">Actualizar</button>
+      </header>
+
+      <!-- Tabla -->
+      <div class="overflow-hidden rounded-2xl border bg-white/80 backdrop-blur shadow ring-1 ring-black/5">
+        <table class="w-full table-auto text-sm text-gray-800">
+          <thead class="bg-gray-50/80 text-gray-600">
+            <tr>
+              <th class="p-3 text-left font-semibold">Nombre</th>
+              <th class="p-3 text-left font-semibold">Correo</th>
+              <th class="p-3 text-left font-semibold">Rol(es)</th>
+              <th class="p-3 text-center font-semibold">Estado</th>
+              <th class="p-3 text-right font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of items" class="border-t hover:bg-gray-50/60">
+              <td class="p-3">{{ u.fullName }}</td>
+              <td class="p-3">{{ u.email }}</td>
+              <td class="p-3">
+                <span class="inline-flex flex-wrap gap-1">
+                  <span *ngFor="let r of u.roles"
+                        class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
+                    {{ r }}
+                  </span>
+                </span>
+              </td>
+              <td class="p-3 text-center">
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+                      [ngClass]="u.isActive
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : 'border-red-200 bg-red-50 text-red-700'">
+                  {{ u.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="p-3 text-right">
+                <div class="inline-flex flex-wrap items-center gap-3">
+                  <button class="text-blue-600 hover:underline" (click)="openEdit(u)">Editar</button>
+                  <button class="text-indigo-600 hover:underline" (click)="openRole(u)">Rol</button>
+                  <button class="text-amber-700 hover:underline" (click)="reset(u)" [disabled]="busy">Reset pass</button>
+                  <button class="text-red-600 hover:underline" *ngIf="u.isActive" (click)="deactivate(u)" [disabled]="busy">Desactivar</button>
+                  <button class="text-emerald-700 hover:underline" *ngIf="!u.isActive" (click)="activate(u)" [disabled]="busy">Activar</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="items.length === 0">
+              <td colspan="5" class="p-6 text-center text-gray-600">Sin resultados</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="text-sm text-gray-600">
+          Página {{ page }} de {{ totalPages }} — {{ total }} registros
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            class="rounded-xl border px-3 py-1.5 text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+            (click)="prev()" [disabled]="page<=1">Anterior</button>
+          <button
+            class="rounded-xl border px-3 py-1.5 text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+            (click)="next()" [disabled]="page>=totalPages">Siguiente</button>
+          <select
+            class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-gray-800 shadow-sm
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            [(ngModel)]="pageSize" (change)="goto(1)">
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div *ngIf="msg"
+           class="mt-3 rounded-xl border px-3 py-2 text-sm"
+           [ngClass]="ok ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'">
+        {{ msg }}
+      </div>
+    </div>
+
+    <!-- MODAL: CREAR -->
+    <div *ngIf="showCreate" class="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+      <div class="w-full max-w-md rounded-2xl border bg-white/90 backdrop-blur p-5 shadow-xl ring-1 ring-black/10">
+        <h3 class="mb-3 text-lg font-semibold text-gray-900">Nuevo usuario</h3>
+
+        <form [formGroup]="createForm" (ngSubmit)="confirmCreate()" class="space-y-3">
+          <input class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="Nombre completo" formControlName="fullName">
+
+          <input type="email" class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="Correo" formControlName="email">
+
+          <input class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="Teléfono (opcional)" formControlName="phoneNumber">
+
+          <select class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                         focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  formControlName="role">
+            <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+          </select>
+
+          <input type="text" class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="Contraseña (opcional)" formControlName="password">
+
+          <div class="pt-2 flex justify-end gap-2">
+            <button type="button" class="rounded-xl border px-4 py-2 text-gray-700 hover:bg-gray-50" (click)="closeCreate()">Cancelar</button>
+            <button class="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-sm transition
+                           hover:scale-[1.01] hover:bg-emerald-600 active:scale-95 disabled:opacity-50"
+                    [disabled]="createForm.invalid || busy">Crear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: EDITAR -->
+    <div *ngIf="showEdit" class="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+      <div class="w-full max-w-md rounded-2xl border bg-white/90 backdrop-blur p-5 shadow-xl ring-1 ring-black/10">
+        <h3 class="mb-3 text-lg font-semibold text-gray-900">Editar usuario</h3>
+
+        <form [formGroup]="editForm" (ngSubmit)="confirmEdit()" class="space-y-3">
+          <input class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="Nombre completo" formControlName="fullName">
+
+          <input class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                 placeholder="Teléfono (opcional)" formControlName="phoneNumber">
+
+          <label class="inline-flex items-center gap-2 text-gray-800">
+            <input type="checkbox" formControlName="isActive"
+                   class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+            <span>Activo</span>
+          </label>
+
+          <div class="pt-2 flex justify-end gap-2">
+            <button type="button" class="rounded-xl border px-4 py-2 text-gray-700 hover:bg-gray-50" (click)="closeEdit()">Cancelar</button>
+            <button class="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm transition
+                           hover:scale-[1.01] hover:bg-blue-500 active:scale-95 disabled:opacity-50"
+                    [disabled]="editForm.invalid || busy">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: CAMBIAR ROL -->
+    <div *ngIf="showRole" class="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+      <div class="w-full max-w-sm rounded-2xl border bg-white/90 backdrop-blur p-5 shadow-xl ring-1 ring-black/10">
+        <h3 class="mb-3 text-lg font-semibold text-gray-900">Cambiar rol</h3>
+
+        <select class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                [(ngModel)]="roleToSet">
+          <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+        </select>
+
+        <div class="pt-3 flex justify-end gap-2">
+          <button class="rounded-xl border px-4 py-2 text-gray-700 hover:bg-gray-50" (click)="closeRole()">Cancelar</button>
+          <button class="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm transition
+                         hover:scale-[1.01] hover:bg-indigo-500 active:scale-95 disabled:opacity-50"
+                  (click)="confirmRole()" [disabled]="busy">Actualizar</button>
         </div>
       </div>
     </div>
+
   </section>
   `,
 })
 export class UsersListComponent implements OnInit {
-  // datos
   items: UserSummary[] = [];
   roles: string[] = [];
 
-  // filtros/paginación
   page = 1;
   pageSize = 10;
   total = 0;
@@ -171,7 +253,6 @@ export class UsersListComponent implements OnInit {
   }
   search = '';
 
-  // UI state
   busy = false;
   msg = ''; ok = false;
 
@@ -182,14 +263,12 @@ export class UsersListComponent implements OnInit {
   selected?: UserSummary;
   roleToSet = '';
 
-  // forms (se inicializan en ngOnInit)
   createForm!: FormGroup;
   editForm!: FormGroup;
 
   constructor(private api: UsersService, private fb: FormBuilder) {}
 
   ngOnInit(): void {
-    // construir forms aquí (ya existe this.fb)
     this.createForm = this.fb.group({
       fullName:    ['', Validators.required],
       email:       ['', [Validators.required, Validators.email]],
@@ -204,15 +283,11 @@ export class UsersListComponent implements OnInit {
       isActive:    [true]
     });
 
-    // cargar datos iniciales
     this.loadRoles();
     this.reload();
   }
 
-  /* Carga */
-  loadRoles() {
-    this.api.roles().subscribe({ next: r => this.roles = r });
-  }
+  loadRoles() { this.api.roles().subscribe({ next: r => this.roles = r }); }
 
   reload() {
     this.api.list({
@@ -227,16 +302,12 @@ export class UsersListComponent implements OnInit {
     });
   }
 
-  clearFilters() {
-    this.search = ''; this.role = ''; this.activeStr = '';
-    this.goto(1);
-  }
+  clearFilters() { this.search = ''; this.role = ''; this.activeStr = ''; this.goto(1); }
 
   prev(){ if (this.page > 1) this.goto(this.page - 1); }
   next(){ if (this.page < this.totalPages) this.goto(this.page + 1); }
   goto(p: number){ this.page = p; this.reload(); }
 
-  /* Crear */
   openCreate(){ this.createForm.reset({ role: 'Client' }); this.showCreate = true; }
   closeCreate(){ this.showCreate = false; }
   confirmCreate(){
@@ -248,7 +319,6 @@ export class UsersListComponent implements OnInit {
     });
   }
 
-  /* Editar */
   openEdit(u: UserSummary){
     this.selected = u;
     this.editForm.reset({
@@ -269,7 +339,6 @@ export class UsersListComponent implements OnInit {
     });
   }
 
-  /* Rol */
   openRole(u: UserSummary){ this.selected = u; this.roleToSet = u.roles[0] ?? 'Client'; this.showRole = true; }
   closeRole(){ this.showRole = false; }
   confirmRole(){
@@ -281,7 +350,6 @@ export class UsersListComponent implements OnInit {
     });
   }
 
-  /* Activar / Desactivar */
   deactivate(u: UserSummary){
     this.busy = true;
     this.api.deactivate(u.id).subscribe({
@@ -297,7 +365,6 @@ export class UsersListComponent implements OnInit {
     });
   }
 
-  /* Reset pass */
   reset(u: UserSummary){
     this.busy = true;
     this.api.resetPassword(u.id).subscribe({
@@ -306,6 +373,5 @@ export class UsersListComponent implements OnInit {
     });
   }
 
-  /* UI helper */
   private toast(ok: boolean, msg: string){ this.ok = ok; this.msg = msg; setTimeout(()=> this.msg='', 4000); }
 }

@@ -9,59 +9,144 @@ import { AuthService, UserProfile, UpdateProfileDto, ChangePasswordDto } from '.
   selector: 'app-profile',
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-  <section class="max-w-3xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-6">Mi perfil</h1>
+  <section class="min-h-[80vh] bg-emerald-50/60">
+    <div class="mx-auto max-w-5xl px-6 py-10">
+      <!-- Header -->
+      <header class="mb-8">
+        <h1 class="text-3xl font-extrabold text-gray-900">Mi perfil</h1>
+        <p class="text-gray-600">Gestiona tus datos y la seguridad de tu cuenta.</p>
+      </header>
 
-    <!-- Datos básicos -->
-    <div class="bg-white rounded shadow p-4 mb-6">
-      <h2 class="font-semibold mb-3">Datos</h2>
-      <form [formGroup]="form" (ngSubmit)="saveProfile()" class="space-y-3">
-        <div>
-          <label class="block text-sm mb-1">Nombre completo</label>
-          <input class="w-full border rounded px-3 py-2" formControlName="fullName">
-        </div>
-        <div>
-          <label class="block text-sm mb-1">Correo</label>
-          <input class="w-full border rounded px-3 py-2 bg-gray-100" [value]="profile?.email" disabled>
-        </div>
-        <div>
-          <label class="block text-sm mb-1">Teléfono</label>
-          <input class="w-full border rounded px-3 py-2" formControlName="phoneNumber">
-        </div>
-        <div class="pt-2">
-          <button class="px-4 py-2 bg-blue-600 text-white rounded" [disabled]="form.invalid || busy">
-            {{ busy ? 'Guardando…' : 'Guardar' }}
-          </button>
-          <span *ngIf="msg1" class="ml-3 text-sm" [class.text-green-600]="ok1" [class.text-red-600]="!ok1">{{ msg1 }}</span>
-        </div>
-      </form>
-    </div>
+      <!-- Grid -->
+      <div class="grid gap-8 md:grid-cols-2">
+        <!-- Card Datos -->
+        <div class="rounded-2xl border bg-white/80 backdrop-blur shadow-lg ring-1 ring-black/5">
+          <div class="border-b px-6 py-4">
+            <h2 class="text-lg font-semibold text-gray-800">Datos</h2>
+          </div>
 
-    <!-- Cambiar contraseña -->
-    <div class="bg-white rounded shadow p-4">
-      <h2 class="font-semibold mb-3">Cambiar contraseña</h2>
-      <form [formGroup]="pwdForm" (ngSubmit)="savePassword()" class="space-y-3">
-        <div>
-          <label class="block text-sm mb-1">Contraseña actual</label>
-          <input type="password" class="w-full border rounded px-3 py-2" formControlName="currentPassword">
+          <form [formGroup]="form" (ngSubmit)="saveProfile()"
+                class="px-6 py-5 space-y-4"
+                [class.opacity-60]="busy" [attr.aria-busy]="busy">
+            <!-- Nombre -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">Nombre completo</label>
+              <input
+                class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                formControlName="fullName" />
+              <p *ngIf="form.get('fullName')?.invalid && form.get('fullName')?.touched"
+                 class="mt-1 text-xs text-red-600">Este campo es obligatorio.</p>
+            </div>
+
+            <!-- Correo -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">Correo</label>
+              <input
+                class="w-full rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-gray-600"
+                [value]="profile?.email" disabled />
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">Teléfono</label>
+              <input
+                class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                formControlName="phoneNumber" />
+            </div>
+
+            <!-- Estado -->
+            <div *ngIf="msg1"
+                 class="rounded-xl border px-3 py-2 text-sm"
+                 [ngClass]="ok1
+                   ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                   : 'border-red-200 bg-red-50 text-red-700'">
+              {{ msg1 }}
+            </div>
+
+            <div class="pt-1">
+              <button
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-md transition
+                       hover:scale-[1.01] hover:bg-emerald-600 active:scale-95 disabled:opacity-50"
+                [disabled]="form.invalid || busy">
+                {{ busy ? 'Guardando…' : 'Guardar' }}
+              </button>
+            </div>
+          </form>
         </div>
-        <div>
-          <label class="block text-sm mb-1">Nueva contraseña</label>
-          <input type="password" class="w-full border rounded px-3 py-2" formControlName="newPassword">
-          <p class="text-xs text-gray-500 mt-1">Debe cumplir la política de seguridad definida.</p>
+
+        <!-- Card Password -->
+        <div class="rounded-2xl border bg-white/80 backdrop-blur shadow-lg ring-1 ring-black/5">
+          <div class="border-b px-6 py-4">
+            <h2 class="text-lg font-semibold text-gray-800">Cambiar contraseña</h2>
+          </div>
+
+          <form [formGroup]="pwdForm" (ngSubmit)="savePassword()"
+                class="px-6 py-5 space-y-4"
+                [class.opacity-60]="busy2" [attr.aria-busy]="busy2">
+
+            <!-- Actual -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">Contraseña actual</label>
+              <div class="relative">
+                <input [type]="showPwd1 ? 'text' : 'password'"
+                  class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900
+                         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  formControlName="currentPassword" />
+                <button type="button" (click)="showPwd1 = !showPwd1"
+                        class="absolute inset-y-0 right-2 my-auto h-8 rounded-md px-2 text-gray-500 hover:bg-gray-100">
+                  {{ showPwd1 ? 'Ocultar' : 'Ver' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Nueva -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">Nueva contraseña</label>
+              <div class="relative">
+                <input [type]="showPwd2 ? 'text' : 'password'"
+                  class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900
+                         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  formControlName="newPassword" />
+                <button type="button" (click)="showPwd2 = !showPwd2"
+                        class="absolute inset-y-0 right-2 my-auto h-8 rounded-md px-2 text-gray-500 hover:bg-gray-100">
+                  {{ showPwd2 ? 'Ocultar' : 'Ver' }}
+                </button>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Debe cumplir la política de seguridad definida.</p>
+            </div>
+
+            <!-- Confirmar -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">Confirmar nueva contraseña</label>
+              <input [type]="showPwd2 ? 'text' : 'password'"
+                class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                formControlName="confirm" />
+              <p *ngIf="pwdMismatch" class="mt-1 text-xs text-red-600">No coincide la confirmación.</p>
+            </div>
+
+            <!-- Estado -->
+            <div *ngIf="msg2"
+                 class="rounded-xl border px-3 py-2 text-sm"
+                 [ngClass]="ok2
+                   ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                   : 'border-red-200 bg-red-50 text-red-700'">
+              {{ msg2 }}
+            </div>
+
+            <div class="pt-1">
+              <button
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-md transition
+                       hover:scale-[1.01] hover:bg-emerald-600 active:scale-95 disabled:opacity-50"
+                [disabled]="pwdForm.invalid || pwdMismatch || busy2">
+                {{ busy2 ? 'Actualizando…' : 'Actualizar contraseña' }}
+              </button>
+            </div>
+          </form>
         </div>
-        <div>
-          <label class="block text-sm mb-1">Confirmar nueva contraseña</label>
-          <input type="password" class="w-full border rounded px-3 py-2" formControlName="confirm">
-        </div>
-        <div class="pt-2">
-          <button class="px-4 py-2 bg-green-600 text-white rounded" [disabled]="pwdForm.invalid || pwdMismatch || busy2">
-            {{ busy2 ? 'Actualizando…' : 'Actualizar contraseña' }}
-          </button>
-          <span *ngIf="pwdMismatch" class="ml-3 text-sm text-red-600">No coincide la confirmación.</span>
-          <span *ngIf="msg2" class="ml-3 text-sm" [class.text-green-600]="ok2" [class.text-red-600]="!ok2">{{ msg2 }}</span>
-        </div>
-      </form>
+      </div>
     </div>
   </section>
   `
@@ -69,9 +154,11 @@ import { AuthService, UserProfile, UpdateProfileDto, ChangePasswordDto } from '.
 export class ProfileComponent implements OnInit {
   profile?: UserProfile;
 
-  // Se crean en ngOnInit
   form!: FormGroup;
   pwdForm!: FormGroup;
+
+  showPwd1 = false;
+  showPwd2 = false;
 
   get pwdMismatch() {
     if (!this.pwdForm) return false;
@@ -85,7 +172,6 @@ export class ProfileComponent implements OnInit {
   constructor(private fb: FormBuilder, private auth: AuthService) {}
 
   ngOnInit(): void {
-    // Inicializar forms aquí (ya existe this.fb)
     this.form = this.fb.group({
       fullName: ['', Validators.required],
       phoneNumber: ['']
@@ -97,7 +183,6 @@ export class ProfileComponent implements OnInit {
       confirm: ['', Validators.required]
     });
 
-    // Cargar perfil después de tener el form listo
     this.load();
   }
 
@@ -116,7 +201,6 @@ export class ProfileComponent implements OnInit {
   saveProfile() {
     if (this.form.invalid) return;
     this.busy = true; this.msg1 = ''; this.ok1 = false;
-
     const dto = this.form.getRawValue() as UpdateProfileDto;
     this.auth.updateMe(dto).subscribe({
       next: () => { this.ok1 = true; this.msg1 = 'Datos guardados.'; this.busy = false; this.load(); },

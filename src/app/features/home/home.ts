@@ -11,7 +11,7 @@ import { ProductReviewsComponent } from '../products/products-reviews';
   standalone: true,
   selector: 'app-home',
   templateUrl: './home.html',
-  styleUrls: ['./home.css'],
+  styleUrls: ['./home.scss'],
   imports: [
     CommonModule,
     RouterModule,

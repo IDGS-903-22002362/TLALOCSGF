@@ -1,0 +1,43 @@
+/* ===== NAV LINKS ===== */
+.nav-link {
+  @apply rounded-lg px-2 py-1 text-sm font-medium transition;
+}
+
+/* ===== DROPDOWN ===== */
+.dropdown {
+  @apply invisible absolute right-0 mt-2 w-56 translate-y-2 rounded-2xl
+         border border-emerald-100 bg-white/80 backdrop-blur-md p-2 opacity-0
+         shadow-xl ring-1 ring-black/5 transition-all duration-200
+         group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 z-50;
+}
+
+.dropdown-list { @apply flex flex-col gap-1; }
+
+.dropdown-item {
+  @apply inline-flex items-center gap-3 rounded-xl px-3 py-2 text-sm
+         text-gray-700 hover:bg-emerald-50 hover:text-emerald-800
+         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0
+         active:scale-[0.98] transition;
+}
+
+/* ✅ tamaño de iconos en el dropdown (hard override contra resets) */
+.dropdown-item .icon,
+.dropdown :is(svg.icon, img.icon) {
+  width: 1rem !important;   /* 16px */
+  height: 1rem !important;
+  flex: 0 0 auto;
+}
+
+/* separador opcional */
+.dropdown-sep { @apply my-2 h-px bg-gray-100; }
+
+/* acción destructiva */
+.dropdown-item--danger { @apply text-red-600 hover:bg-red-50 hover:text-red-700; }
+
+/* demás utilidades si las usas en esta vista */
+.badge        { @apply rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700; }
+.feature-card { @apply flex items-start gap-3 rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md; }
+.feature-icon { @apply flex h-10 w-10 items-center justify-center rounded-xl text-emerald-700; }
+.feature-title{ @apply text-base font-semibold text-gray-800; }
+.feature-desc { @apply text-sm text-gray-600; }
+.admin-card   { @apply rounded-2xl border p-4 text-center font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-50 hover:shadow-md; }

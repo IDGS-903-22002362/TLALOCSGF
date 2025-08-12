@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+// src/app/features/support/ticket-detail.component.ts
+import { Component, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -10,80 +11,113 @@ import { AuthService } from '../../core/services/auth';
   selector: 'app-ticket-detail',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   template: `
-  <section class="max-w-4xl mx-auto p-6" *ngIf="ticket()">
-  <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold">Ticket #{{ ticket()?.id }}</h1>
+  <section class="bg-emerald-50/60 min-h-[80vh]" *ngIf="ticket() as t">
+    <div class="mx-auto max-w-5xl px-6 py-10">
 
-    <div class="flex items-center gap-3">
-      <!-- 👇 Solo Admin ve este botón -->
-      <button
-        *ngIf="isAdmin"
-        class="px-3 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700"
-        (click)="publishFaq()">
-        Publicar como FAQ
-      </button>
+      <!-- Header -->
+      <div class="mb-6 flex items-center justify-between gap-3">
+        <a routerLink="/support/tickets"
+           class="inline-flex items-center gap-2 text-emerald-700 hover:underline">
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L8.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+          Volver
+        </a>
 
-      <a routerLink="/support/tickets" class="text-green-700 hover:underline text-sm">← Volver</a>
-    </div>
-  </div>
+        <h1 class="text-3xl font-extrabold text-gray-900">Ticket #{{ t.id }}</h1>
 
-  <div class="bg-white rounded border p-4 mb-4">
-    <div class="grid md:grid-cols-2 gap-3">
-      <div>
-        <div class="text-sm text-gray-500">Asunto</div>
-        <div class="font-medium">{{ ticket()?.subject }}</div>
-      </div>
-      <div>
-        <div class="text-sm text-gray-500">Estado</div>
-        <span class="px-2 py-0.5 rounded inline-block"
-              [class.bg-yellow-100]="ticket()?.status==='Open'"
-              [class.bg-blue-100]="ticket()?.status==='In Progress'"
-              [class.bg-green-100]="ticket()?.status==='Closed'">
-          {{ ticket()?.status }}
-        </span>
-      </div>
-      <div>
-        <div class="text-sm text-gray-500">Creado</div>
-        <div>{{ ticket()?.createdAt | date:'short' }}</div>
-      </div>
-      <div>
-        <div class="text-sm text-gray-500">Cerrado</div>
-        <div>{{ ticket()?.closedAt ? (ticket()?.closedAt | date:'short') : '-' }}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="bg-white rounded border p-4 mb-4">
-    <h2 class="font-semibold mb-3">Mensajes</h2>
-    <div class="space-y-3 max-h-[420px] overflow-auto pr-1">
-      <div *ngFor="let m of messages()" class="border rounded p-3"
-           [class.bg-gray-50]="m.senderId === meId">
-        <div class="text-xs text-gray-500 mb-1">
-          <b>{{ m.senderName || (m.senderId === meId ? 'Tú' : m.senderId) }}</b> —
-          {{ m.createdAt | date:'short' }}
-        </div>
-        <div class="whitespace-pre-line">{{ m.body }}</div>
-      </div>
-      <div *ngIf="messages().length === 0" class="text-gray-500">Sin mensajes aún.</div>
-    </div>
-
-    <form [formGroup]="form" (ngSubmit)="send()" class="mt-4">
-      <textarea class="w-full border rounded px-3 py-2" rows="3"
-                placeholder="Escribe un mensaje..."
-                formControlName="body"
-                [disabled]="ticket()?.status==='Closed' || sending()"></textarea>
-      <div class="mt-2">
-        <button class="bg-green-600 text-white rounded px-4 py-2"
-                [disabled]="form.invalid || ticket()?.status==='Closed' || sending()">
-          {{ sending() ? 'Enviando…' : 'Enviar' }}
+        <button *ngIf="isAdmin"
+          class="rounded-xl border border-emerald-600 px-4 py-2 font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 active:scale-95"
+          (click)="publishFaq()">
+          Publicar como FAQ
         </button>
-        <span *ngIf="ticket()?.status==='Closed'" class="ml-3 text-sm text-gray-500">
-          El ticket está cerrado.
-        </span>
       </div>
-    </form>
-  </div>
-</section>
+
+      <!-- Meta -->
+      <div class="mb-6 rounded-2xl border bg-white/80 backdrop-blur p-5 shadow ring-1 ring-black/5">
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <div class="text-sm text-gray-500">Asunto</div>
+            <div class="font-medium text-gray-900">{{ t.subject }}</div>
+          </div>
+
+          <div>
+            <div class="text-sm text-gray-500">Estado</div>
+            <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+                  [ngClass]="{
+                    'border-amber-200 bg-amber-50 text-amber-700': t.status==='Open',
+                    'border-sky-200 bg-sky-50 text-sky-700': t.status==='In Progress',
+                    'border-emerald-200 bg-emerald-50 text-emerald-700': t.status==='Closed'
+                  }">
+              {{ t.status }}
+            </span>
+          </div>
+
+          <div>
+            <div class="text-sm text-gray-500">Creado</div>
+            <div class="text-gray-800">{{ t.createdAt | date:'short' }}</div>
+          </div>
+
+          <div>
+            <div class="text-sm text-gray-500">Cerrado</div>
+            <div class="text-gray-800">{{ t.closedAt ? (t.closedAt | date:'short') : '-' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversación -->
+      <div class="rounded-2xl border bg-white/80 backdrop-blur p-5 shadow ring-1 ring-black/5">
+        <h2 class="mb-4 text-lg font-semibold text-gray-800">Mensajes</h2>
+
+        <div #scrollArea class="max-h-[420px] overflow-auto pr-2 space-y-4">
+          <ng-container *ngIf="messages().length; else empty">
+            <div *ngFor="let m of messages()"
+                 class="max-w-[85%]"
+                 [ngClass]="{ 'ml-auto': m.senderId === meId }">
+              <div class="mb-1 text-xs text-gray-500"
+                   [ngClass]="{ 'text-right': m.senderId === meId }">
+                <b>{{ m.senderName || (m.senderId === meId ? 'Tú' : m.senderId) }}</b>
+                — {{ m.createdAt | date:'short' }}
+              </div>
+
+              <div class="rounded-2xl border px-4 py-2 shadow-sm whitespace-pre-line"
+                   [ngClass]="m.senderId === meId
+                     ? 'bg-emerald-600 text-white border-emerald-600'
+                     : 'bg-white text-gray-800 border-gray-200'">
+                {{ m.body }}
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #empty>
+            <div class="text-gray-500">Sin mensajes aún.</div>
+          </ng-template>
+        </div>
+
+        <!-- Composer -->
+        <form [formGroup]="form" (ngSubmit)="send()" class="mt-4">
+          <textarea rows="3"
+            class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-gray-900
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            placeholder="Escribe un mensaje..."
+            formControlName="body"
+            [disabled]="t.status==='Closed' || sending()"></textarea>
+
+          <div class="mt-2 flex items-center gap-3">
+            <button
+              class="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-md transition
+                     hover:scale-[1.01] hover:bg-emerald-600 active:scale-95 disabled:opacity-50"
+              [disabled]="form.invalid || t.status==='Closed' || sending()">
+              {{ sending() ? 'Enviando…' : 'Enviar' }}
+            </button>
+
+            <span *ngIf="t.status==='Closed'" class="text-sm text-gray-500">
+              El ticket está cerrado.
+            </span>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
   `
 })
 export class TicketDetailComponent {
@@ -92,7 +126,8 @@ export class TicketDetailComponent {
   private fb    = inject(FormBuilder);
   private auth  = inject(AuthService);
 
-  // 👇 ahora existe
+  @ViewChild('scrollArea') scrollArea?: ElementRef<HTMLDivElement>;
+
   isAdmin = this.auth.roles.some(r => r.toLowerCase() === 'admin');
 
   ticket   = signal<TicketDto | null>(null);
@@ -115,7 +150,16 @@ export class TicketDetailComponent {
 
   private load(id: number) {
     this.api.getTicket(id).subscribe({ next: t => this.ticket.set(t) });
-    this.api.getMessages(id).subscribe({ next: msgs => this.messages.set(msgs) });
+    this.api.getMessages(id).subscribe({
+      next: msgs => { this.messages.set(msgs); this.scrollToBottom(); }
+    });
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      const el = this.scrollArea?.nativeElement;
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 0);
   }
 
   send() {
@@ -130,14 +174,14 @@ export class TicketDetailComponent {
         this.messages.update(arr => [...arr, m]);
         this.form.reset();
         this.sending.set(false);
-        // puede cambiar a "In Progress" si respondió un admin
+        this.scrollToBottom();
+        // refresca status del ticket (podría pasar a "In Progress")
         this.api.getTicket(id).subscribe({ next: t => this.ticket.set(t) });
       },
       error: _ => this.sending.set(false)
     });
   }
 
-  // 👇 botón "Publicar como FAQ"
   publishFaq() {
     const t = this.ticket();
     if (!t) return;
