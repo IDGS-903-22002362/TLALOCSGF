@@ -41,7 +41,7 @@ export const routes: Routes = [
         title: 'Pedidos',
         canActivate: [authGuard],
         loadComponent: () =>
-          import('./features/orders/orders').then(m => m.Orders)
+          import('./features/orders/orders').then(m => m.OrdersComponent)
       },
       {
         path: 'products',

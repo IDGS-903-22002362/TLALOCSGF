@@ -4,63 +4,136 @@
       Opiniones de Nuestros Clientes
     </h2>
 
+    <!-- Mensajes del sistema -->
+    <div *ngIf="message" class="mb-4 p-4 rounded-lg" 
+         [class.bg-green-100]="message.includes('Gracias') || message.includes('aprobada')" 
+         [class.bg-red-100]="message.includes('Error') || message.includes('rechazada')">
+      <p class="text-center">{{ message }}</p>
+    </div>
+
+    <!-- Estado de carga -->
     <div *ngIf="loadingReviews" class="text-center text-gray-500">Cargando reseñas...</div>
 
-    <div *ngIf="!loadingReviews && reviews.length === 0" class="text-center text-gray-500">
+    <!-- Sin reseñas -->
+    <div *ngIf="!loadingReviews && approvedReviews.length === 0" class="text-center text-gray-500">
       No hay reseñas disponibles.
     </div>
 
-    <div *ngIf="!loadingReviews && reviews.length > 0" class="space-y-10">
-      <article *ngFor="let review of reviews" class="bg-white rounded-2xl p-6 shadow-md dark:bg-gray-800">
+    <!-- Lista de reseñas aprobadas -->
+    <div *ngIf="!loadingReviews && approvedReviews.length > 0" class="space-y-10">
+      <article *ngFor="let review of approvedReviews" class="bg-white rounded-2xl p-6 shadow-md">
+        <div class="flex justify-between items-start">
+          <!-- Info usuario -->
+          <div class="flex items-center mb-4">
+            <img src="/img/user.png" alt="Avatar" class="w-10 h-10 rounded-full me-4">
+            <div>
+              <p class="font-medium">{{ review.customerName }}</p>
+              <time class="text-sm text-gray-500">{{ review.createdAt | date:'longDate' }}</time>
+            </div>
+          </div>
 
-        <!-- Header con avatar, nombre y fecha -->
-        <div class="flex items-center mb-4">
-          <img src="/img/user.png" alt="Avatar de cliente" class="w-10 h-10 rounded-full me-4 object-cover" />
-          <div class="font-medium dark:text-white">
-            <p>{{ review.customerName }}
-              <time [attr.datetime]="review.createdAt">
-                {{ review.createdAt | date:'longDate' }}
-              </time>
-
-            </p>
+          <!-- Acciones admin -->
+          <div *ngIf="isAdmin" class="flex gap-2">
+            <button (click)="approveReview(review.reviewId, false)" 
+                    class="text-red-500 hover:text-red-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </button>
           </div>
         </div>
 
-        <!-- Estrellas y resumen -->
-        <div class="flex items-center mb-2 space-x-1 rtl:space-x-reverse">
-          <ng-container *ngFor="let star of [1,2,3,4,5]; let i = index">
-            <svg *ngIf="star <= review.rating" class="w-4 h-4 text-yellow-400" xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-              <path
-                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.39 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.39-2.46a1 1 0 00-1.175 0l-3.39 2.46c-.784.57-1.838-.196-1.539-1.118l1.286-3.966a1 1 0 00-.364-1.118L2.045 9.393c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.966z" />
-            </svg>
-            <svg *ngIf="star > review.rating" class="w-4 h-4 text-gray-300 dark:text-gray-500"
-              xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-              <path
-                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.39 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.39-2.46a1 1 0 00-1.175 0l-3.39 2.46c-.784.57-1.838-.196-1.539-1.118l1.286-3.966a1 1 0 00-.364-1.118L2.045 9.393c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.966z" />
-            </svg>
-          </ng-container>
-          <h3 class="ms-2 text-sm font-semibold text-gray-900 dark:text-white" *ngIf="review.comment; else noComment">{{
-            review.comment }}</h3>
-          <ng-template #noComment>
-            <p class="text-gray-400 italic dark:text-gray-500">Sin comentario</p>
-          </ng-template>
+        <!-- Rating -->
+        <div class="flex items-center mb-2">
+          <div class="flex">
+            <ng-container *ngFor="let star of [1,2,3,4,5]">
+              <svg *ngIf="star <= review.rating" class="w-5 h-5 text-yellow-400" 
+                   xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg *ngIf="star > review.rating" class="w-5 h-5 text-gray-300" 
+                   xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </ng-container>
+          </div>
         </div>
 
-        <!-- Texto completo de la reseña -->
-        <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
-          <!-- Si quieres mostrar algo más detallado, como un campo descripción -->
-          <!-- Aquí repites comentario o agregas otro campo -->
-          {{ review.comment || 'Este cliente no dejó comentario adicional.' }}
-        </p>
-
-        <!-- Opcional: acciones o feedback -->
-        <aside class="mt-4">
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Fecha de la reseña: {{ review.createdAt | date:'mediumDate' }}
-          </p>
-        </aside>
+        <!-- Comentario -->
+        <p class="text-gray-700 mt-2" *ngIf="review.comment">{{ review.comment }}</p>
       </article>
+    </div>
+
+    <!-- Formulario para clientes que compraron -->
+    <div *ngIf="canReview && !loadingReviews" class="mt-10 bg-white p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold mb-4">Deja tu reseña</h3>
+      <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="space-y-4">
+        <div>
+          <label class="block mb-2 font-medium">Calificación</label>
+          <div class="flex space-x-1">
+            <ng-container *ngFor="let star of [1,2,3,4,5]">
+              <button type="button" (click)="reviewForm.get('rating')?.setValue(star)">
+                <svg [class.text-yellow-400]="star <= reviewForm.get('rating')?.value" 
+                     [class.text-gray-300]="star > reviewForm.get('rating')?.value" 
+                     class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </button>
+            </ng-container>
+          </div>
+        </div>
+
+        <div>
+          <label class="block mb-2 font-medium">Comentario (opcional)</label>
+          <textarea formControlName="comment" rows="4" 
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+        </div>
+
+        <button type="submit" [disabled]="reviewForm.invalid || submitting" 
+                class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:bg-gray-400">
+          <span *ngIf="!submitting">Enviar reseña</span>
+          <span *ngIf="submitting">Enviando...</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Mensaje para no compradores -->
+    <div *ngIf="!canReview && !loadingReviews" class="mt-6 p-4 bg-blue-50 rounded-lg text-center">
+      <p class="text-blue-800">Solo clientes que han comprado este producto pueden dejar reseñas.</p>
+    </div>
+
+    <!-- Sección para admin: reseñas pendientes -->
+    <div *ngIf="isAdmin && pendingReviews.length > 0" class="mt-12">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Reseñas pendientes de aprobación</h3>
+      <div class="space-y-6">
+        <article *ngFor="let review of pendingReviews" 
+                 class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+          <div class="flex justify-between">
+            <div>
+              <p class="font-medium">{{ review.customerName }}</p>
+              <div class="flex mt-1">
+                <ng-container *ngFor="let star of [1,2,3,4,5]">
+                  <svg *ngIf="star <= review.rating" class="w-4 h-4 text-yellow-400" 
+                       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </ng-container>
+              </div>
+              <p *ngIf="review.comment" class="mt-2 text-gray-700">{{ review.comment }}</p>
+            </div>
+            <div class="flex gap-2">
+              <button (click)="approveReview(review.reviewId, true)" 
+                      class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                Aprobar
+              </button>
+              <button (click)="approveReview(review.reviewId, false)" 
+                      class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                Rechazar
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
     </div>
   </div>
 </section>

@@ -42,4 +42,8 @@ export class ProductService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
   }
+  createWithBOM(dto: any): Observable<any> {
+  return this.http.post(`${this.api}/with-bom`, dto);
+}
+
 }

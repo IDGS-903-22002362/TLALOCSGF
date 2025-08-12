@@ -30,6 +30,10 @@ export class AuthService {
     );
   }
 
+  hasRole(role: string): boolean {
+  return this.roles.includes(role);
+}
+
   /*──────── Refresh ────────*/
   refresh(): Observable<void> {
     const refreshDto: RefreshDto = {
