@@ -1,0 +1,122 @@
+<nav class="relative mx-auto z-50 flex items-center justify-between px-6 py-4 md:px-10">
+  <!-- Logo -->
+  <a routerLink="/" class="flex items-center gap-2">
+    <img src="/img/LogoMenu.png" alt="logo" class="h-15 w-15 object-contain" />
+    <span class="sr-only">Inicio</span>
+  </a>
+
+  <!-- Botón mobile -->
+  <button
+    data-collapse-toggle="main-menu"
+    type="button"
+    class="inline-flex items-center rounded-lg p-2 text-gray-600 hover:bg-gray-100 focus:outline-none md:hidden"
+    aria-controls="main-menu"
+    aria-expanded="false"
+  >
+    <span class="sr-only">Abrir menú</span>
+    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
+
+  <!-- Items -->
+  <div id="main-menu" class="hidden w-full items-center justify-between md:flex md:w-auto">
+    <ul class="mt-4 flex flex-col gap-1 md:mt-0 md:flex-row md:items-center md:gap-6">
+      <!-- Links base (Inicio, Producto, FAQ) -->
+      <li *ngFor="let i of baseNav">
+        <a [routerLink]="i.path" routerLinkActive="text-emerald-700" class="nav-link">{{ i.label }}</a>
+      </li>
+
+      <!-- Cotiza (depende de login) -->
+      <li>
+        <a [routerLink]="cotizaPath" routerLinkActive="text-emerald-700" class="nav-link">Cotiza</a>
+      </li>
+
+      <!-- Contacto (tickets cliente si logueado, /auth si no) -->
+      <li>
+        <a [routerLink]="contactoPath" routerLinkActive="text-emerald-700" class="nav-link">Contacto</a>
+      </li>
+
+      <!-- ADMIN dropdown -->
+      <li *ngIf="isAdmin" class="relative">
+        <button
+          id="adminMenuBtn"
+          data-dropdown-toggle="adminMenu"
+          data-dropdown-placement="bottom-end"
+          type="button"
+          class="nav-link inline-flex items-center gap-1"
+        >
+          Admin
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fill-rule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+
+        <!-- Contenido dropdown -->
+        <div id="adminMenu" role="menu" aria-labelledby="adminMenuBtn" class="dropdown-menu hidden z-50">
+          <ng-container *ngFor="let item of adminMenu">
+            <a [routerLink]="item.path" class="dropdown-item">{{ item.label }}</a>
+          </ng-container>
+        </div>
+      </li>
+
+      <!-- Lado derecho: CTA + Login/Mi cuenta -->
+      <li class="flex items-center gap-3 md:ml-4">
+        <!-- CTA -->
+        <a
+          [routerLink]="cotizaPath"
+          class="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white shadow-md transition hover:scale-[1.02] hover:bg-emerald-600 active:scale-95"
+        >
+          Solicitar cotización
+        </a>
+
+        <!-- Login / Menú usuario -->
+        <ng-container *ngIf="!auth.isLoggedIn(); else userMenu">
+          <a
+            routerLink="/auth"
+            class="rounded-xl border border-emerald-700 px-4 py-2 font-semibold text-emerald-700 transition hover:bg-emerald-50"
+          >
+            Login
+          </a>
+        </ng-container>
+
+        <ng-template #userMenu>
+          <div class="relative">
+            <button
+              id="userMenuBtn"
+              data-dropdown-toggle="userMenu"
+              data-dropdown-placement="bottom-end"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 14a4 4 0 10-8 0m8 0a4 4 0 01-8 0m8 0v1a7 7 0 11-14 0v-1a7 7 0 1114 0z"/>
+              </svg>
+              Mi cuenta
+              <svg class="h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            <div id="userMenu" role="menu" aria-labelledby="userMenuBtn" class="dropdown-menu hidden z-50">
+              <a routerLink="/support/tickets" class="dropdown-item">Mis tickets</a>
+              <a routerLink="/quotes" class="dropdown-item">Mis cotizaciones</a>
+              <a routerLink="/profile" class="dropdown-item">Mi perfil</a>
+              <div class="dropdown-sep"></div>
+              <button type="button" (click)="logout()" class="dropdown-item dropdown-item--danger">Salir</button>
+            </div>
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+  </div>
+</nav>

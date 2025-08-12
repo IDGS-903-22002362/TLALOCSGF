@@ -14,6 +14,7 @@ import { QuoteLine }    from '../../models/quote';
   template: `
   <section class="bg-emerald-50/60 min-h-[80vh]">
     <div class="max-w-6xl mx-auto px-6 py-10">
+      
 
       <!-- Header -->
       <header class="mb-6">

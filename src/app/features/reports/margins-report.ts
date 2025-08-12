@@ -4,14 +4,51 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { ReportsService, MarginRow } from '../../core/services/reports';
-
+import { RouterLink, RouterLinkActive } from '@angular/router';
 @Component({
   standalone: true,
   selector: 'app-margins-report',
-  imports: [CommonModule, FormsModule, NgxEchartsModule],
+  imports: [CommonModule, FormsModule, NgxEchartsModule, RouterLink, RouterLinkActive],
   template: `
   <section class="max-w-6xl mx-auto p-6 space-y-4">
     <h1 class="text-2xl font-bold">Márgenes por producto</h1>
+      <!-- ▸ SUBNAV REPORTES (pegar debajo del <h1>) -->
+<nav class="mt-1 mb-4">
+  <ul class="flex flex-wrap gap-2">
+    <li>
+      <a
+        routerLink="/reports/sales"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="bg-emerald-700 text-white border-emerald-700 shadow"
+        class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium
+               text-gray-700 hover:bg-emerald-50 transition">
+        Ventas
+      </a>
+    </li>
+
+    <li>
+      <a
+        routerLink="/reports/rotation"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="bg-emerald-700 text-white border-emerald-700 shadow"
+        class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium
+               text-gray-700 hover:bg-emerald-50 transition">
+        Rotación
+      </a>
+    </li>
+
+    <li>
+      <a
+        routerLink="/reports/margins"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="bg-emerald-700 text-white border-emerald-700 shadow"
+        class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium
+               text-gray-700 hover:bg-emerald-50 transition">
+        Márgenes
+      </a>
+    </li>
+  </ul>
+</nav>
 
     <!-- Filtros -->
     <div
