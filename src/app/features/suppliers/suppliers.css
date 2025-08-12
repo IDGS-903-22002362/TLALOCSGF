@@ -1,32 +1,7 @@
-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #2d6a4f;
-  padding: 1rem 2rem;
-  color: white;
-}
-
-.nav-links {
-  display: flex;
-  gap: 50px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: white;
-  font-weight: 500;
-  font-size: 15px;
-}
-
-.nav-links .btn {
-  background-color: white;
-  color: #2d6a4f;
-  padding: 8px 16px;
-  border-radius: 6px;
-  text-decoration: none;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 /* Tarjeta de proveedores */

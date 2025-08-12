@@ -77,6 +77,8 @@ nav {
 }
 
 /* Tabla */
+
+/* Tabla */
 .table-container {
   overflow-x: auto;
   margin-top: 1rem;
@@ -94,14 +96,12 @@ th.mat-header-cell {
   color: white !important;
   font-weight: 600;
   padding: 12px !important;
-  text-align: center !important;
 }
 
 td.mat-cell {
   padding: 10px 12px !important;
   color: #1b4332;
   border-bottom: 1px solid #e0e0e0;
-  text-align: center !important;
 }
 
 tr.mat-row:nth-child(even) td {

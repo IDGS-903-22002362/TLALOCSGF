@@ -1,84 +1,90 @@
-<mat-card>
-  <mat-toolbar color="primary">
-    <span>Historial de Compras</span>
-    <span class="spacer"></span>
-    <button mat-raised-button color="accent" (click)="openModal()">
-      <mat-icon>add</mat-icon> Surtir Material
-    </button>
-  </mat-toolbar>
-
-  <table mat-table [dataSource]="purchases" class="mat-elevation-z8">
-    <ng-container matColumnDef="supplier">
-      <th mat-header-cell *matHeaderCellDef>Proveedor</th>
-      <td mat-cell *matCellDef="let p">{{ p.supplierName }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="date">
-      <th mat-header-cell *matHeaderCellDef>Fecha</th>
-      <td mat-cell *matCellDef="let p">{{ p.purchaseDate | date:'short' }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="total">
-      <th mat-header-cell *matHeaderCellDef>Total</th>
-      <td mat-cell *matCellDef="let p">{{ formatCurrency(p.totalAmount) }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Estatus</th>
-      <td mat-cell *matCellDef="let p">{{ p.status }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Acciones</th>
-      <td mat-cell *matCellDef="let p">
-        <button mat-icon-button color="primary" (click)="openEditModal(p)">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button color="warn" (click)="cancelarCompra(p.purchaseId)">
-          <mat-icon>cancel</mat-icon>
-        </button>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-  </table>
-</mat-card>
-
-<!-- Modal -->
-<div class="modal" *ngIf="modalOpen">
-  <div class="modal-content">
-    <h2>{{ editingId ? 'Editar Compra' : 'Surtir Material' }}</h2>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Proveedor</mat-label>
-      <mat-select [(ngModel)]="formData.supplierId">
-        <mat-option *ngFor="let s of suppliers" [value]="s.supplierId">{{ s.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Material</mat-label>
-      <mat-select [(ngModel)]="formData.materialId">
-        <mat-option *ngFor="let m of materials" [value]="m.materialId">{{ m.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Cantidad</mat-label>
-      <input matInput type="number" [(ngModel)]="formData.quantity">
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Precio Unitario</mat-label>
-      <input matInput type="number" [(ngModel)]="formData.unitCost">
-    </mat-form-field>
-
-    <div class="actions">
-      <button mat-button (click)="closeModal()">Cancelar</button>
-      <button mat-raised-button color="primary" (click)="submitForm()">
-        {{ editingId ? 'Actualizar' : 'Guardar' }}
+<div class="container">
+  <mat-card class="supplier-card">
+    <div class="card-header">
+      <div class="title-section">
+        <mat-icon color="primary">inventory</mat-icon>
+        <h2>Historial de Compras</h2>
+      </div>
+      <button mat-raised-button color="accent" (click)="openModal()">
+        <mat-icon>add</mat-icon> Surtir Material
       </button>
+    </div>
+
+    <div class="table-container">
+      <table mat-table [dataSource]="purchases" class="mat-elevation-z8 mat-mdc-table">
+        <ng-container matColumnDef="supplier">
+          <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+          <td mat-cell *matCellDef="let p">{{ p.supplierName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+          <td mat-cell *matCellDef="let p">{{ p.purchaseDate | date:'short' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef>Total</th>
+          <td mat-cell *matCellDef="let p">{{ formatCurrency(p.totalAmount) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Estatus</th>
+          <td mat-cell *matCellDef="let p">{{ p.status }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let p">
+            <button mat-icon-button color="primary" (click)="openEditModal(p)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="cancelarCompra(p.purchaseId)">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="mat-mdc-header-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="mat-mdc-row"></tr>
+      </table>
+    </div>
+  </mat-card>
+
+  <!-- Modal -->
+  <div class="modal" *ngIf="modalOpen">
+    <div class="modal-content">
+      <h2>{{ editingId ? 'Editar Compra' : 'Surtir Material' }}</h2>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Proveedor</mat-label>
+        <mat-select [(ngModel)]="formData.supplierId">
+          <mat-option *ngFor="let s of suppliers" [value]="s.supplierId">{{ s.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Material</mat-label>
+        <mat-select [(ngModel)]="formData.materialId">
+          <mat-option *ngFor="let m of materials" [value]="m.materialId">{{ m.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Cantidad</mat-label>
+        <input matInput type="number" [(ngModel)]="formData.quantity" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Precio Unitario</mat-label>
+        <input matInput type="number" [(ngModel)]="formData.unitCost" />
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-button (click)="closeModal()">Cancelar</button>
+        <button mat-raised-button color="primary" (click)="submitForm()">
+          {{ editingId ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

@@ -46,7 +46,8 @@ export class NavbarComponent {
     { label: 'Tickets (Admin)',  path: '/support/admin/tickets' },   // admin tickets
     { label: 'Reportes',         path: '/reports' },                 // ./features/reports/routes
     { label: 'Proveedores',      path: '/suppliers' },               // ./features/suppliers/suppliers
-    { label: 'Inventario',       path: '/inventory' },               // ./features/inventory/inventory
+    { label: 'Inventario',       path: '/inventory' },   
+     { label: 'Compras',       path: '/purchases' }           // ./features/inventory/inventory
   ];
 
   logout() {
